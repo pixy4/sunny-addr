@@ -1,0 +1,2264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>南京小学二年级 · 阳光学习能量站</title>
+  <style>
+    :root {
+      --primary: #66bb6a;
+      --primary-dark: #2e7d32;
+      --accent: #ffca28;
+      --accent-dark: #ffa000;
+      --sky: #e3f2fd;
+      --soil: #8d6e63;
+      --card: #fffde7;
+      --text: #2e3b28;
+      --muted: #6d7b66;
+      --shadow: 0 4px 0 rgba(0,0,0,0.12);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 10%, rgba(255,255,255,0.35) 0, transparent 25%),
+        radial-gradient(circle at 90% 90%, rgba(255,255,255,0.25) 0, transparent 25%),
+        linear-gradient(180deg, #c8e6c9 0%, #a5d6a7 60%, #81c784 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* 顶部状态栏 */
+    header {
+      background: linear-gradient(90deg, #43a047, #66bb6a);
+      color: white;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      flex-wrap: wrap;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand .logo {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: var(--accent);
+      display: grid; place-items: center;
+      font-size: 24px; box-shadow: var(--shadow);
+    }
+    .brand h1 { margin: 0; font-size: 18px; letter-spacing: 0.5px; }
+    .brand input {
+      background: rgba(255,255,255,0.25); border: none; border-radius: 8px;
+      padding: 4px 10px; color: #fff; font-size: 16px; font-weight: bold;
+      width: 110px; outline: none;
+    }
+    .brand input::placeholder { color: rgba(255,255,255,0.7); }
+
+    .stats { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .badge {
+      background: rgba(255,255,255,0.2); border-radius: 999px;
+      padding: 6px 12px; font-size: 14px; font-weight: bold;
+      display: flex; align-items: center; gap: 6px; backdrop-filter: blur(4px);
+    }
+    .badge.sun { background: #fff3c4; color: #6d4c41; }
+    .badge.streak { background: #ffccbc; color: #bf360c; }
+    .badge.level { background: #d1c4e9; color: #4527a0; }
+    .btn {
+      border: none; border-radius: 999px; padding: 8px 16px;
+      font-weight: bold; cursor: pointer; font-size: 14px;
+      box-shadow: var(--shadow); transition: transform .08s, box-shadow .08s;
+      font-family: inherit;
+    }
+    .btn:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,0.12); }
+    .btn-checkin { background: var(--accent); color: #5d4037; }
+    .btn-checkin:disabled { background: #bdbdbd; cursor: not-allowed; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-warn { background: #ff7043; color: white; }
+    .btn-ghost { background: #fff; color: #2e7d32; }
+    .btn-mini { padding: 4px 10px; font-size: 12px; box-shadow: 0 2px 0 rgba(0,0,0,0.1); }
+
+    /* 主体布局 */
+    .layout {
+      display: flex; gap: 16px; padding: 16px; max-width: 1200px; margin: 0 auto;
+    }
+    nav {
+      width: 90px; flex-shrink: 0;
+      display: flex; flex-direction: column; gap: 10px;
+      position: sticky; top: 82px; align-self: flex-start;
+    }
+    .nav-item {
+      background: var(--card); border: 2px solid rgba(0,0,0,0.08);
+      border-radius: var(--radius); padding: 10px 4px;
+      text-align: center; cursor: pointer; font-weight: bold;
+      box-shadow: var(--shadow); transition: transform .1s;
+      font-size: 13px; color: var(--text);
+      position: relative;
+    }
+    .nav-item .subj-edit {
+      position: absolute; top: 2px; right: 2px;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: rgba(0,0,0,0.15); border: none; color: #fff;
+      font-size: 11px; display: none; cursor: pointer;
+      align-items: center; justify-content: center; padding: 0;
+    }
+    body.editmode .nav-item .subj-edit { display: flex; }
+    .add-subj-row { display: none; }
+    body.editmode .add-subj-row { display: block; }
+    .nav-item .icon { display: block; font-size: 24px; margin-bottom: 4px; }
+    .nav-item:hover { transform: translateY(-2px); }
+    .nav-item.active { background: var(--accent); border-color: var(--accent-dark); color: #4e342e; }
+
+    main { flex: 1; min-width: 0; }
+
+    /* 待确认横幅 */
+    .pending-banner {
+      background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+      border: 3px dashed #ff7043; border-radius: var(--radius);
+      padding: 12px 16px; margin-bottom: 14px;
+      box-shadow: var(--shadow);
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; flex-wrap: wrap; font-weight: bold; color: #bf360c;
+    }
+    .pending-banner.hide { display: none; }
+
+    /* 今日推荐 */
+    .today-box {
+      background: linear-gradient(135deg, #fff9c4, #fff59d);
+      border: 3px dashed var(--accent-dark); border-radius: var(--radius);
+      padding: 14px 18px; margin-bottom: 18px;
+      box-shadow: var(--shadow); display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+    }
+    .today-box h2 { margin: 0; font-size: 16px; color: #5d4037; }
+    .today-box .quick-task {
+      background: white; border-radius: 999px; padding: 6px 12px;
+      font-size: 13px; cursor: pointer; box-shadow: 0 2px 0 rgba(0,0,0,0.08);
+      border: 2px solid transparent;
+    }
+    .today-box .quick-task:hover { border-color: var(--accent-dark); }
+    .today-box .quick-task.done { opacity: .55; text-decoration: line-through; }
+    .today-box .quick-task.pending { opacity: .8; border-color: #ff7043; }
+
+    /* 学科进度条 */
+    .subject-progress {
+      background: var(--card); border-radius: var(--radius);
+      padding: 12px 16px; margin-bottom: 18px;
+      box-shadow: var(--shadow); border: 2px solid rgba(0,0,0,0.06);
+    }
+    .subject-progress h3 { margin: 0 0 10px; font-size: 15px; display: flex; justify-content: space-between; }
+    .progress-track { background: #e0e0e0; border-radius: 999px; height: 12px; overflow: hidden; }
+    .progress-fill { height: 100%; width: 0%; border-radius: 999px; transition: width .5s ease; }
+
+    /* 任务卡片 */
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .card {
+      background: var(--card); border-radius: var(--radius);
+      border: 3px solid; box-shadow: var(--shadow);
+      overflow: hidden; display: flex; flex-direction: column;
+    }
+    .card-header {
+      padding: 12px 14px; color: white; font-weight: bold;
+      display: flex; justify-content: space-between; align-items: center; gap: 6px;
+    }
+    .card-header .unit-title { font-size: 15px; }
+    .card-header .unit-no { font-size: 12px; opacity: .9; background: rgba(0,0,0,0.15); padding: 2px 8px; border-radius: 999px; }
+    .card-header .unit-del { cursor: pointer; font-size: 13px; background: rgba(0,0,0,0.18); border: none; color: #fff; border-radius: 8px; padding: 3px 8px; display: none; }
+    .card-body { padding: 12px 14px; flex: 1; }
+    .task {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 8px 0; border-bottom: 1px dashed rgba(0,0,0,0.1);
+    }
+    .task:last-child { border-bottom: none; }
+    .task input[type="checkbox"] {
+      width: 20px; height: 20px; accent-color: var(--primary); cursor: pointer; flex-shrink: 0; margin-top: 1px;
+    }
+    .task label { flex: 1; cursor: pointer; font-size: 14px; line-height: 1.45; }
+    .task.done label { text-decoration: line-through; opacity: .55; }
+    .task.pending label { color: #e65100; }
+    .task.pending .reward-tag { background: #ffe0b2; color: #e65100; }
+    .task .reward-tag {
+      font-size: 11px; color: var(--accent-dark); font-weight: bold;
+      background: #fff8e1; border-radius: 999px; padding: 2px 7px; flex-shrink: 0;
+    }
+    .task .tag-daily {
+      font-size: 10px; color: #1565c0; font-weight: bold;
+      background: #e3f2fd; border-radius: 999px; padding: 2px 6px; flex-shrink: 0;
+    }
+    .task .task-edit, .task .task-del {
+      border: none; background: #f1f8e9; border-radius: 8px; cursor: pointer;
+      font-size: 12px; padding: 2px 7px; flex-shrink: 0; display: none;
+    }
+    .task .task-del { background: #ffebee; }
+    body.editmode .task .task-edit, body.editmode .task .task-del { display: inline-block; }
+    body.editmode .task input[type="checkbox"] { visibility: hidden; }
+    .add-task-row {
+      display: none; padding: 8px 0;
+    }
+    body.editmode .add-task-row { display: block; }
+    body.editmode .card-header .unit-edit, body.editmode .card-header .unit-del { display: inline-block; }
+    body.editmode .add-unit-row { display: block; }
+
+    /* 奖励面板 */
+    .reward-drawer {
+      position: fixed; right: 16px; bottom: 16px; z-index: 90;
+      background: var(--card); border-radius: var(--radius);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2); border: 3px solid var(--accent);
+      width: min(360px, calc(100vw - 32px)); max-height: 70vh;
+      display: flex; flex-direction: column;
+    }
+    .reward-head {
+      background: var(--accent); color: #5d4037; padding: 10px 14px;
+      font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+      border-radius: 14px 14px 0 0;
+    }
+    .reward-body { padding: 12px 14px; overflow-y: auto; display: none; }
+    .reward-drawer.open .reward-body { display: block; }
+    .reward-item {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      background: white; border-radius: 12px; padding: 10px 12px; margin-bottom: 10px;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.06);
+    }
+    .reward-item span { font-size: 14px; }
+    .reward-item small { color: var(--muted); }
+    .reward-item .rw-edit, .reward-item .rw-del {
+      border: none; background: #f1f8e9; border-radius: 8px; cursor: pointer;
+      font-size: 12px; padding: 4px 8px; display: none; flex-shrink: 0;
+    }
+    .reward-item .rw-del { background: #ffebee; }
+    body.editmode .reward-item .rw-edit, body.editmode .reward-item .rw-del { display: inline-block; }
+    .add-reward-row { display: none; }
+    body.editmode .add-reward-row { display: block; }
+
+    /* 弹窗 */
+    .modal-mask {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      z-index: 300; display: none; align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal-mask.show { display: flex; }
+    .modal {
+      background: #fffdf5; border-radius: 20px; border: 3px solid var(--accent);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      width: min(520px, 100%); max-height: 86vh; display: flex; flex-direction: column;
+    }
+    .modal-head {
+      background: var(--accent); color: #5d4037; font-weight: bold;
+      padding: 12px 16px; border-radius: 16px 16px 0 0;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .modal-head .close { cursor: pointer; font-size: 18px; background: none; border: none; color: #5d4037; }
+    .modal-body { padding: 16px; overflow-y: auto; font-size: 14px; }
+    .modal-body h4 { margin: 18px 0 8px; color: var(--primary-dark); border-bottom: 2px dashed #e0e0e0; padding-bottom: 4px; }
+    .modal-body h4:first-child { margin-top: 0; }
+    .form-row { display: flex; align-items: center; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
+    .form-row label { min-width: 88px; font-weight: bold; }
+    .form-row input[type="text"], .form-row input[type="number"], .form-row input[type="password"] {
+      flex: 1; min-width: 120px; padding: 8px 10px; border: 2px solid #e0e0e0;
+      border-radius: 10px; font-size: 14px; font-family: inherit; outline: none;
+    }
+    .form-row input:focus { border-color: var(--primary); }
+    .form-row input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--primary); }
+    .hint { color: var(--muted); font-size: 12px; margin: 4px 0 8px; }
+    .section-note { background: #f1f8e9; border-radius: 10px; padding: 8px 12px; font-size: 12px; color: #55663f; margin: 8px 0; }
+    .snap-row, .ledger-row {
+      display: flex; justify-content: space-between; align-items: center; gap: 8px;
+      padding: 7px 10px; border-radius: 10px; margin-bottom: 6px; background: #fff; box-shadow: 0 1px 0 rgba(0,0,0,0.06);
+      font-size: 13px;
+    }
+    .ledger-row .gain { color: #ef6c00; font-weight: bold; }
+    .ledger-row .cost { color: #6d7b66; font-weight: bold; }
+    .ledger-time { color: var(--muted); font-size: 11px; }
+    .code-box {
+      font-family: monospace; font-size: 15px; letter-spacing: 1px;
+      background: #263238; color: #ffd54f; border-radius: 10px;
+      padding: 8px 12px; user-select: all; margin: 6px 0;
+      word-break: break-all;
+    }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; flex-wrap: wrap; }
+
+    /* 老版本清理模态 */
+    .legacy-list { display: flex; flex-direction: column; gap: 6px; max-height: 320px; overflow-y: auto; padding: 4px 0; }
+    .legacy-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px; border-radius: 10px; background: #fff;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.06); font-size: 13px; cursor: pointer;
+    }
+    .legacy-row:hover { background: #fafafa; }
+    .legacy-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--primary); flex-shrink: 0; }
+    .legacy-row > div { flex: 1; min-width: 0; }
+    .legacy-row b { word-break: break-all; }
+    .cat-tag {
+      display: inline-block; font-size: 11px; padding: 1px 6px; border-radius: 6px;
+      background: #fff3e0; color: #bf6a02; margin-left: 4px; vertical-align: middle;
+    }
+    .empty-tip {
+      padding: 18px; text-align: center; color: var(--muted);
+      background: #f1f8e9; border-radius: 10px; margin: 10px 0;
+    }
+
+    /* 提示气泡 */
+    .toast {
+      position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+      background: #333; color: white; padding: 10px 18px; border-radius: 999px;
+      font-size: 14px; opacity: 0; pointer-events: none; transition: opacity .3s;
+      z-index: 400; max-width: 90vw; text-align: center;
+    }
+    .toast.show { opacity: 1; }
+
+    /* 动画 */
+    @keyframes pop {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.25); }
+      100% { transform: scale(1); }
+    }
+    .pop { animation: pop .25s ease; }
+
+    @media (max-width: 700px) {
+      header { padding: 10px 12px; }
+      .brand h1 { font-size: 15px; }
+      .layout { flex-direction: column; padding: 12px; }
+      nav { width: 100%; flex-direction: row; overflow-x: auto; position: static; }
+      .nav-item { min-width: 72px; padding: 8px 4px; }
+      .cards { grid-template-columns: 1fr; }
+      .reward-drawer { right: 10px; bottom: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo">☀️</div>
+      <div>
+        <h1><input id="studentName" value="小同学" maxlength="6">的二年级学习能量站<span id="verTag" style="font-size:12px;color:#aaa;font-weight:normal;margin-left:6px;"></span></h1>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="badge level" id="levelBadge">🌱 等级 1</div>
+      <div class="badge streak" id="streakBadge">🔥 连续 0 天</div>
+      <div class="badge sun" id="sunBadge">☀️ <span id="sunCount">0</span></div>
+      <button class="btn btn-checkin" id="checkInBtn">每日打卡 +20☀️</button>
+      <button class="btn btn-ghost btn-mini" id="ledgerBtn" title="积分流水">📊 流水</button>
+      <button class="btn btn-ghost btn-mini" id="editBtn" title="编辑模式">✏️ 编辑</button>
+      <button class="btn btn-ghost btn-mini" id="settingsBtn" title="设置">⚙️</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav id="nav"></nav>
+    <main>
+      <div class="pending-banner hide" id="pendingBanner">
+        <span id="pendingText">📋 有任务等待家长确认</span>
+        <button class="btn btn-warn" id="confirmPendingBtn">🔐 家长确认</button>
+      </div>
+      <div class="today-box">
+        <h2>📌 今日推荐：</h2>
+        <div id="quickTasks"></div>
+      </div>
+      <div class="subject-progress" id="progressBox">
+        <h3><span id="currentSubjectTitle">语文</span><span id="currentSubjectPercent">0%</span></h3>
+        <div class="progress-track"><div class="progress-fill" id="currentSubjectBar"></div></div>
+      </div>
+      <div class="cards" id="cards"></div>
+    </main>
+  </div>
+
+  <div class="reward-drawer" id="rewardDrawer">
+    <div class="reward-head" id="rewardHead">
+      <span>🎁 阳光兑换商店</span>
+      <span id="rewardToggle">展开</span>
+    </div>
+    <div class="reward-body" id="rewardBody"></div>
+  </div>
+
+  <div class="modal-mask" id="modalMask">
+    <div class="modal">
+      <div class="modal-head">
+        <span id="modalTitle">设置</span>
+        <button class="close" id="modalClose">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    /* ================================================================
+       阳光学习能量站 v3.0 · 南京小学二年级
+       新增：数据版本迁移 / IndexedDB 自动备份 / 积分流水账
+            家长审核模式(PIN) / 每日重复任务 / 页面内编辑器 / 云同步
+       v2.2：云同步改用「局域网家庭云」（自家电脑做服务器，免费永久）；
+            移除已停服的 LeanCloud
+       v2.3.1：彻底移除 kvdb.io 海外云同步（邮箱激活、14 天试用、
+            国内不稳，不再保留）；旧 kvdb 绑定自动解除，本地数据保留
+       v2.3.2：编辑模式下除了"添加任务"，现在还可以「添加单元」和
+            「编辑单元名」（点单元标题或 ✏️ 即可改名、按 🗑 删单元）
+       v2.3.3：编辑模式扩展至左侧学科栏——现在可以「添加学科」和
+            「编辑学科」（改名称/图标/颜色、上移下移调整顺序）
+       v2.4：cpolar 取址改为「GitHub 地址公告板」：公司电脑每 10 分钟
+            自动把最新隧道地址推送到 GitHub，页面每次打开直接从
+            GitHub 取地址→直连公司电脑同步；家里 Mac 无需再开地址桥；
+            云同步升级为 10 秒轮询 + 严格时间戳「新旧覆盖」(LWW)；
+            设置面板家长模式 PIN 闸门(进入设置也需验证)
+       v3.0：新增「清理老版本遗留数据」——扫出 localStorage 里旧版本/
+            已废弃后端/其它站点残留的 key 与 IndexedDB 里多余库，勾选后
+            一键删除，绝不触碰当前 v2 数据、cpolar 地址与备份快照
+       ================================================================ */
+
+    /* ============== 默认学科数据（教材：统编版语文·苏教版数学/科学·统编版道法） ============== */
+    const DEFAULT_SUBJECTS = [
+      {
+        id: "chinese", name: "语文", icon: "📖", color: "#ef5350",
+        units: [
+          { title: "第一单元 · 童话故事", tasks: ["《小蝌蚪找妈妈》朗读", "《我是什么》朗读", "《植物妈妈有办法》朗读", "认读本单元生字词", "书写本单元生字", "给家长讲《小蝌蚪找妈妈》"] },
+          { title: "第二单元 · 识字", tasks: ["《场景歌》朗读背诵", "《树之歌》朗读", "《拍手歌》边拍边读", "《田家四季歌》背诵", "识字园地生字认读", "认一认常见树木"] },
+          { title: "第三单元 · 儿童生活", tasks: ["《曹冲称象》朗读", "复述曹冲称象的办法", "《玲玲的画》朗读", "《一封信》《妈妈睡了》朗读", "口语交际：做一件小手工", "给爸妈介绍自己的手工"] },
+          { title: "第四单元 · 家乡之美", tasks: ["背诵《登鹳雀楼》", "背诵《望庐山瀑布》", "《黄山奇石》朗读", "《日月潭》朗读", "《葡萄沟》朗读", "写话：学写一张留言条"] },
+          { title: "第五单元 · 思维方法", tasks: ["《坐井观天》朗读", "《寒号鸟》朗读", "《我要的是葫芦》朗读", "演一演《坐井观天》", "口语交际：和爸妈商量一件事"] },
+          { title: "第六单元 · 伟人故事", tasks: ["《大禹治水》朗读", "《朱德的扁担》朗读", "《难忘的泼水节》朗读", "讲一个伟人小故事", "口语交际：看图讲故事"] },
+          { title: "第七单元 · 奇思妙想", tasks: ["背诵《夜宿山寺》", "背诵《敕勒歌》", "《雾在哪里》朗读", "《雪孩子》朗读", "写话：看图写一段话"] },
+          { title: "第八单元 · 相处有方", tasks: ["《狐假虎威》朗读", "《纸船和风筝》朗读", "《风娃娃》朗读", "给家人讲一个故事", "口语交际：图书借阅公约"] }
+        ]
+      },
+      {
+        id: "math", name: "数学", icon: "🔢", color: "#42a5f5",
+        units: [
+          { title: "一、1-6 的表内乘法", tasks: ["认识几个几", "认识乘法", "1-4 的乘法口诀背一背", "5 的乘法口诀背一背", "6 的乘法口诀背一背", "乘法口诀小练习"] },
+          { title: "二、1-6 的表内除法", tasks: ["认识平均分", "认识除法", "用乘法口诀求商", "除法小练习", "奇妙的七巧板：拼一个图形"] },
+          { title: "三、7-9 的表内乘除法", tasks: ["7 的乘法口诀背一背", "用 7 的口诀求商", "8 的乘法口诀及求商", "9 的乘法口诀及求商", "生活中的方向：说一说东南西北"] },
+          { title: "四、认识三位数", tasks: ["认识 100", "认识 101-999", "认识算盘", "读数写数练习"] },
+          { title: "五、两位数加、减两位数", tasks: ["口算不进位、不退位加减", "口算进位加法", "口算退位减法", "欢乐购物街：认识人民币", "帮家长算一次购物小账"] },
+          { title: "六、有余数的除法", tasks: ["有余数除法的意义", "有余数除法的计算", "有余数除法小练习"] },
+          { title: "期末复习", tasks: ["乘法口诀总复习", "除法总复习", "加减口算总复习", "综合小练习"] }
+        ]
+      },
+      {
+        id: "english", name: "英语", icon: "🔤", color: "#ab47bc",
+        units: [
+          { title: "字母乐园", tasks: ["认读 26 个字母", "学写字母 Aa-Mm", "学写字母 Nn-Zz", "唱《字母歌》"] },
+          { title: "问候与数字", tasks: ["学说 Hello / Good morning", "数字 1-10 认读", "数字 1-20 数一数", "用英语自我介绍"] },
+          { title: "颜色与水果", tasks: ["颜色单词 red/yellow/blue", "水果单词 apple/banana", "水果颜色小对话", "边指边读游戏 5 分钟"] },
+          { title: "动物与家庭", tasks: ["动物单词 cat/dog/bird", "家庭成员单词", "学唱一首英文儿歌", "指物说词小游戏"] }
+        ]
+      },
+      {
+        id: "science", name: "科学", icon: "🔬", color: "#26a69a",
+        units: [
+          { title: "第一单元 · 关心天气", tasks: ["认识天气符号", "记录一周天气", "天气对生活的影响", "四季的天气说一说"] },
+          { title: "第二单元 · 材料大世界", tasks: ["认识常见材料", "各种各样的杯子", "神奇的新材料", "家里材料分类小调查"] },
+          { title: "第三单元 · 用力以后", tasks: ["推和拉小体验", "形状改变了：捏橡皮泥", "动起来与停下来", "力的生活小实验"] },
+          { title: "第四单元 · 奇妙的光", tasks: ["明亮与黑暗", "透明与不透明", "玩玻璃纸", "记录一个光的现象"] },
+          { title: "专项学习", tasks: ["像工程师那样：完成一个小设计"] }
+        ]
+      },
+      {
+        id: "morality", name: "道法", icon: "🤝", color: "#ff7043",
+        units: [
+          { title: "第一单元 · 我们的节假日", tasks: ["假期有收获", "周末巧安排", "欢欢喜喜庆国庆", "团团圆圆过中秋"] },
+          { title: "第二单元 · 我们的班级", tasks: ["我爱我们班", "班级生活有规则", "我是班级值日生", "装扮我们的教室"] },
+          { title: "第三单元 · 我们在公共场所", tasks: ["这些是大家的", "我们不乱扔", "大家排好队", "我们小点儿声"] },
+          { title: "第四单元 · 我们生活的地方", tasks: ["我爱家乡山和水", "家乡物产养育我", "可亲可敬的家乡人", "家乡的变化说一说"] }
+        ]
+      },
+      {
+        id: "pe", name: "体育", icon: "🏃", color: "#66bb6a",
+        units: [
+          { title: "体能训练", tasks: ["跳绳 3 组 × 1 分钟", "50 米跑练习", "仰卧起坐 20 个", "坐位体前屈拉伸", "高抬腿 1 分钟"] },
+          { title: "球类/游戏", tasks: ["拍篮球 100 下", "踢毽子练习", "跳皮筋 / 跳房子", "老鹰捉小鸡", "广播操 1 遍"] },
+          { title: "健康习惯", daily: true, tasks: ["眼保健操 2 次", "喝水 6 杯", "户外活动 30 分钟", "整理运动装备", "早睡早起打卡"] }
+        ]
+      },
+      {
+        id: "artmusic", name: "音美", icon: "🎨", color: "#ec407a",
+        units: [
+          { title: "音乐", tasks: ["学唱一首新歌", "节奏练习：拍手/跺脚", "认识一种乐器", "欣赏一首名曲", "跟着音乐打拍子"] },
+          { title: "美术", tasks: ["完成一幅画", "折纸 / 手工制作", "认识一位画家", "涂色练习", "整理美术用品"] }
+        ]
+      },
+      {
+        id: "comprehensive", name: "综合", icon: "🌟", color: "#8d6e63",
+        units: [
+          { title: "劳动与实践", tasks: ["整理书包书桌", "叠自己的衣服", "帮忙摆碗筷", "垃圾分类", "浇花 / 照顾绿植"] },
+          { title: "阅读与表达", daily: true, tasks: ["课外阅读 20 分钟", "给家长讲一个故事", "摘抄好词好句", "背诵一首古诗"] },
+          { title: "习惯养成", daily: true, tasks: ["自己穿衣服", "按时起床不赖床", "刷牙洗脸自己来", "睡前收拾玩具", "对家人说一句感谢的话"] }
+        ]
+      }
+    ];
+
+    const DEFAULT_REWARDS = [
+      { id: "r1", name: "看一集动画片", cost: 60 },
+      { id: "r2", name: "玩 30 分钟游戏", cost: 120 },
+      { id: "r3", name: "买一本喜欢的书", cost: 200 },
+      { id: "r4", name: "周末外出游玩", cost: 300 },
+      { id: "r5", name: "选择今晚家庭菜单", cost: 80 },
+      { id: "r6", name: "换取 10 分钟晚睡", cost: 100 }
+    ];
+
+    const DEFAULT_RULES = { taskSun: 5, checkinSun: 20 };
+
+    const STORAGE_KEY = "njGrade2Workbench_v2";
+    const DATA_VERSION = 2;
+    const LEDGER_MAX = 600;
+    const SNAPSHOT_KEEP = 30;
+    /* 云同步后端：lan = 局域网家庭云；cpolar = 公司电脑同步（GitHub 地址公告板动态取址） */
+    const LAN_DEFAULT = "http://127.0.0.1:8787"; /* 局域网家庭云：电脑本机默认地址，其他设备换成电脑 IP */
+    const CPOLAR_ADDR_KEY = "sunnyCpolarLastAddr"; /* 上次成功连接的公司电脑 cpolar 地址（localStorage 缓存，GitHub 取不到时兜底） */
+
+    /* ============== 工具函数 ============== */
+    function todayStr() { return new Date().toLocaleDateString("zh-CN"); }
+    function hashPin(pin) {
+      let h = 5381;
+      for (let i = 0; i < pin.length; i++) h = ((h << 5) + h + pin.charCodeAt(i)) >>> 0;
+      return "h" + h.toString(36);
+    }
+    function uid() { return "c" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+    function fmtTime(ts) {
+      const d = new Date(ts);
+      return (d.getMonth() + 1) + "/" + d.getDate() + " " + d.toTimeString().slice(0, 5);
+    }
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    }
+
+    /* ============== 状态管理（含 v1 → v2 迁移） ============== */
+    let state = null;
+
+    function migrate(parsed) {
+      const s = parsed || {};
+      const v = s.version || 1;
+      const out = {
+        version: DATA_VERSION,
+        name: s.name || "小同学",
+        sun: s.sun || 0,
+        streak: s.streak || 0,
+        lastCheckIn: s.lastCheckIn || "",
+        done: Array.isArray(s.done) ? s.done : [],
+        pending: Array.isArray(s.pending) ? s.pending : [],
+        dailyDone: s.dailyDone || {},
+        dailyPending: s.dailyPending || {},
+        redeemed: s.redeemed || {},
+        ledger: Array.isArray(s.ledger) ? s.ledger : [],
+        custom: s.custom || null,
+        rules: s.rules || null,
+        settings: (() => {
+          const st = Object.assign({ pinHash: "", reviewMode: false, lastExport: "", lan: { server: LAN_DEFAULT }, cpolar: { addr: "" } }, s.settings || {});
+          if (st.cpolar && "bridge" in st.cpolar) delete st.cpolar.bridge; /* v2.3 旧「地址桥」配置，v2.4 起改用 GitHub 地址公告板 */
+          st.cpolar = Object.assign({ addr: "" }, st.cpolar || {});
+          return st;
+        })(),
+        sync: (s.sync && (s.sync.backend === "lc" || s.sync.backend === "kvdb")) ? null : (s.sync || null), /* LeanCloud / kvdb 已移除，旧绑定自动解除（本地数据保留） */
+        updatedAt: s.updatedAt || Date.now()
+      };
+      if (v < 2) {
+        /* v1（旧版索引 id）与 v2 默认任务 id 规则一致，直接兼容 */
+        out.version = DATA_VERSION;
+      }
+      return out;
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("njGrade2Workbench_v1");
+        if (raw) return migrate(JSON.parse(raw));
+      } catch (e) { console.warn("loadState failed", e); }
+      return migrate(null);
+    }
+
+    function serialize() {
+      return {
+        version: state.version,
+        name: state.name,
+        sun: state.sun,
+        streak: state.streak,
+        lastCheckIn: state.lastCheckIn,
+        done: Array.from(state.done),
+        pending: Array.from(state.pending),
+        dailyDone: state.dailyDone,
+        dailyPending: state.dailyPending,
+        redeemed: state.redeemed,
+        ledger: state.ledger,
+        custom: state.custom,
+        rules: state.rules,
+        settings: state.settings,
+        sync: state.sync,
+        updatedAt: state.updatedAt
+      };
+    }
+
+    function adoptState(obj) {
+      const m = migrate(obj);
+      state.done = new Set(m.done);
+      state.pending = new Set(m.pending);
+      ["name","sun","streak","lastCheckIn","dailyDone","dailyPending","redeemed","ledger","custom","rules","settings","sync","updatedAt","version"].forEach(k => { state[k] = m[k]; });
+    }
+
+    let snapTimer = null, syncTimer = null;
+    function save() {
+      state.updatedAt = Date.now();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(serialize())); } catch (e) { console.warn(e); }
+      /* 自动快照（去抖 20 秒） */
+      clearTimeout(snapTimer);
+      snapTimer = setTimeout(takeSnapshot, 20000);
+      /* 自动云同步（去抖 15 秒）。必须走 smartSync（拉取优先 + 空壳守卫），
+         绝不能裸 syncPush——否则空壳页面保存后会把空状态推上去覆盖服务器真实数据 */
+      if (state.sync && state.sync.auto) {
+        clearTimeout(syncTimer);
+        syncTimer = setTimeout(() => smartSync(true), 15000);
+      }
+    }
+    /* 同步专用落盘：只写 localStorage，不抬升 updatedAt、不触发快照/去抖。
+       关键：updatedAt 必须只代表「用户真实改动」的时刻，否则每 10 秒轮询的上传/下载动作
+       会不断把两边时间戳抬到当前时刻 → 「新旧比较」完全失真，两台设备无限互相推拉。
+       同步完成后要落盘 lastSync 等，必须走这里而不是 save()。 */
+    function persistSilent() {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(serialize())); } catch (e) { console.warn(e); }
+    }
+
+    /* ============== 周期轮询同步（自动从服务器拉取最新） ============== */
+    /* 每 POLL_MS 毫秒静默 smartSync 一次：先拉取服务器数据并与本地比较新旧 ——
+       服务器数据新 → 用服务器数据覆盖本地；本地数据新 → 上传本地覆盖服务器（见 smartSync 决策）。 */
+    const POLL_MS = 10000; /* 每 10 秒从服务器拉取一次最新数据 */
+    let pollTimer = null;
+    let pollBusy = false; /* 防止上一轮轮询尚未结束时就重复发起 */
+    function startPolling() {
+      stopPolling();
+      if (!(state.sync && state.sync.auto)) return;
+      pollTimer = setInterval(pollOnce, POLL_MS);
+    }
+    function stopPolling() {
+      if (pollTimer != null) { clearInterval(pollTimer); pollTimer = null; }
+    }
+    function pollOnce() {
+      if (!(state.sync && state.sync.auto)) { stopPolling(); return; }
+      if (pollBusy) return; /* 上一轮还在跑，跳过本轮避免并发请求 */
+      /* 标签页不可见时暂停，避免后台空转 */
+      if (typeof document.visibilityState === "string" && document.visibilityState === "hidden") return;
+      /* 用户正在输入（如改名字/填表）时暂停本轮，避免拉取打断编辑（合并本身安全，仅减少打断） */
+      const ae = document.activeElement;
+      if (ae && (ae.tagName === "INPUT" || ae.tagName === "TEXTAREA")) return;
+      pollBusy = true;
+      smartSync(true).catch(() => {}).finally(() => { pollBusy = false; });
+    }
+
+    /* ============== IndexedDB 自动备份 ============== */
+    function openBackupDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open("sunnyBackups", 1);
+        req.onupgradeneeded = () => { req.result.createObjectStore("snaps", { keyPath: "ts" }); };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+    async function takeSnapshot() {
+      try {
+        const db = await openBackupDB();
+        await new Promise((resolve, reject) => {
+          const tx = db.transaction("snaps", "readwrite");
+          tx.objectStore("snaps").put({ ts: Date.now(), sun: state.sun, data: serialize() });
+          tx.oncomplete = resolve; tx.onerror = () => reject(tx.error);
+        });
+        /* 只保留最近 SNAPSHOT_KEEP 份 */
+        const all = await new Promise((resolve, reject) => {
+          const tx = db.transaction("snaps", "readonly");
+          const req = tx.objectStore("snaps").getAllKeys();
+          req.onsuccess = () => resolve(req.result); req.onerror = () => reject(req.error);
+        });
+        if (all.length > SNAPSHOT_KEEP) {
+          const old = all.slice(0, all.length - SNAPSHOT_KEEP);
+          const tx = db.transaction("snaps", "readwrite");
+          old.forEach(k => tx.objectStore("snaps").delete(k));
+        }
+      } catch (e) { console.warn("snapshot failed", e); }
+    }
+
+    /* ============== 配置（默认 / 自定义合并） ============== */
+    function materializeCustom() {
+      const clone = JSON.parse(JSON.stringify(DEFAULT_SUBJECTS));
+      clone.forEach((s, ui) => s.units.forEach((u, uj) => {
+        u.daily = !!u.daily;
+        u.tasks = u.tasks.map((t, tj) => (typeof t === "string")
+          ? { id: s.id + "-u" + uj + "-t" + tj, t: t }
+          : t);
+      }));
+      const rw = JSON.parse(JSON.stringify(DEFAULT_REWARDS));
+      return { subjects: clone, rewards: rw };
+    }
+
+    function getConfig() {
+      if (state.custom && state.custom.subjects) return state.custom;
+      const base = materializeCustom();
+      return { subjects: base.subjects, rewards: state.custom && state.custom.rewards ? state.custom.rewards : base.rewards };
+    }
+    function getRules() { return Object.assign({}, DEFAULT_RULES, state.rules || {}); }
+
+    function allTasks() {
+      const cfg = getConfig();
+      const list = [];
+      cfg.subjects.forEach(s => s.units.forEach((u, ui) => u.tasks.forEach(t => {
+        list.push(Object.assign({}, t, { sid: s.id, sname: s.name, icon: s.icon, unit: u.title, daily: !!t.daily || !!u.daily }));
+      })));
+      return list;
+    }
+
+    /* ============== 渲染 ============== */
+    let currentSubjectId = DEFAULT_SUBJECTS[0].id;
+    let editMode = false;
+
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 2200);
+    }
+
+    function levelInfo() {
+      const sun = state.sun;
+      if (sun < 100) return { level: 1, title: "🌱 小嫩芽", next: 100 };
+      if (sun < 300) return { level: 2, title: "🌿 绿幼苗", next: 300 };
+      if (sun < 600) return { level: 3, title: "🌻 向阳花", next: 600 };
+      if (sun < 1000) return { level: 4, title: "🌳 知识树", next: 1000 };
+      return { level: 5, title: "🏆 小学霸", next: sun };
+    }
+
+    function addSun(delta, reason) {
+      state.sun = Math.max(0, state.sun + delta);
+      state.ledger.push({ t: Date.now(), d: delta, r: reason });
+      if (state.ledger.length > LEDGER_MAX) state.ledger = state.ledger.slice(-LEDGER_MAX);
+      const badge = document.getElementById("sunBadge");
+      badge.classList.add("pop");
+      setTimeout(() => badge.classList.remove("pop"), 250);
+    }
+
+    function renderHeader() {
+      const rules = getRules();
+      document.getElementById("sunCount").textContent = state.sun;
+      document.getElementById("streakBadge").textContent = "🔥 连续 " + state.streak + " 天";
+      const lv = levelInfo();
+      document.getElementById("levelBadge").textContent = lv.title + " Lv." + lv.level;
+      const btn = document.getElementById("checkInBtn");
+      if (state.lastCheckIn === todayStr()) {
+        btn.textContent = "今日已打卡 ✅";
+        btn.disabled = true;
+      } else {
+        btn.textContent = "每日打卡 +" + rules.checkinSun + "☀️";
+        btn.disabled = false;
+      }
+      document.getElementById("editBtn").textContent = editMode ? "✅ 完成" : "✏️ 编辑";
+    }
+
+    function renderPendingBanner() {
+      const n = state.pending.size + Object.keys(state.dailyPending).length;
+      const banner = document.getElementById("pendingBanner");
+      if (state.settings.reviewMode && n > 0 && !editMode) {
+        banner.classList.remove("hide");
+        document.getElementById("pendingText").textContent = "📋 有 " + n + " 项任务等待家长确认";
+      } else {
+        banner.classList.add("hide");
+      }
+    }
+
+    function renderNav() {
+      const nav = document.getElementById("nav");
+      nav.innerHTML = "";
+      getConfig().subjects.forEach((s, si) => {
+        const el = document.createElement("div");
+        el.className = "nav-item" + (s.id === currentSubjectId ? " active" : "");
+        el.innerHTML = `<span class="icon">${s.icon}</span>${escapeHtml(s.name)}
+          <button class="subj-edit" title="编辑学科">✏️</button>`;
+        el.onclick = (ev) => {
+          if (ev.target.closest(".subj-edit")) return;
+          currentSubjectId = s.id; render();
+        };
+        el.querySelector(".subj-edit").onclick = (ev) => {
+          ev.stopPropagation();
+          openSubjectEditor(s, si);
+        };
+        nav.appendChild(el);
+      });
+      /* 编辑模式：侧栏底部加 ➕ 添加学科 */
+      if (editMode) {
+        const addRow = document.createElement("div");
+        addRow.className = "add-subj-row";
+        addRow.innerHTML = `<button class="btn btn-primary" style="width:100%;padding:8px 2px;font-size:12px;">➕ 学科</button>`;
+        addRow.querySelector("button").onclick = () => openSubjectEditor(null, null);
+        nav.appendChild(addRow);
+      }
+    }
+
+    function taskState(t) {
+      if (t.daily) {
+        const today = todayStr();
+        if (state.dailyDone[t.id] === today) return "done";
+        if (state.dailyPending[t.id] === today) return "pending";
+        return "";
+      }
+      if (state.done.has(t.id)) return "done";
+      if (state.pending.has(t.id)) return "pending";
+      return "";
+    }
+
+    function renderQuickTasks() {
+      const box = document.getElementById("quickTasks");
+      box.innerHTML = "";
+      const tasks = allTasks();
+      const today = todayStr();
+      const notDone = tasks.filter(t => taskState(t) === "");
+      /* 简单稳定挑选：按 id 哈希 + 日期决定起点，取 4 项 */
+      let seed = 0;
+      const dayStr = todayStr();
+      for (let i = 0; i < dayStr.length; i++) seed = (seed * 31 + dayStr.charCodeAt(i)) >>> 0;
+      const picks = [];
+      if (notDone.length) {
+        const start = seed % notDone.length;
+        for (let i = 0; i < Math.min(4, notDone.length); i++) picks.push(notDone[(start + i * 7) % notDone.length]);
+      }
+      if (picks.length === 0) {
+        box.innerHTML = "<span>太棒了！今天的推荐任务都完成了 🎉</span>";
+        return;
+      }
+      const seen = new Set();
+      picks.forEach(t => {
+        if (seen.has(t.id)) return;
+        seen.add(t.id);
+        const st = taskState(t);
+        const tag = document.createElement("span");
+        tag.className = "quick-task" + (st === "done" ? " done" : st === "pending" ? " pending" : "");
+        tag.textContent = `${t.icon} ${t.t}`;
+        tag.onclick = () => { toggleTask(t, true); };
+        box.appendChild(tag);
+      });
+    }
+
+    function subjectProgress(subject) {
+      let done = 0, total = 0;
+      subject.units.forEach(u => u.tasks.forEach(t => {
+        total++;
+        if (taskState(Object.assign({ daily: u.daily || t.daily }, t)) !== "") done++;
+      }));
+      return { done, total, pct: total ? Math.round(done / total * 100) : 0 };
+    }
+
+    function renderCards() {
+      const cfg = getConfig();
+      const rules = getRules();
+      const subject = cfg.subjects.find(s => s.id === currentSubjectId) || cfg.subjects[0];
+      const cards = document.getElementById("cards");
+      cards.innerHTML = "";
+
+      const { pct } = subjectProgress(subject);
+      document.getElementById("currentSubjectTitle").textContent = subject.name;
+      document.getElementById("currentSubjectPercent").textContent = pct + "%";
+      const bar = document.getElementById("currentSubjectBar");
+      bar.style.width = pct + "%";
+      bar.style.background = subject.color;
+
+      subject.units.forEach((u, ui) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.style.borderColor = subject.color;
+        const header = document.createElement("div");
+        header.className = "card-header";
+        header.style.background = subject.color;
+        header.innerHTML = `<span class="unit-title" title="编辑单元名" style="cursor:${editMode ? "pointer" : "default"};">${escapeHtml(u.title)}</span>
+          <span style="display:flex;gap:6px;align-items:center;">
+            ${u.daily ? '<span class="unit-no">每日重置</span>' : ""}
+            <span class="unit-no">第 ${ui + 1} 单元</span>
+            ${editMode ? '<button class="unit-edit" title="编辑单元名">✏️</button>' : ""}
+            ${editMode ? '<button class="unit-del" title="删除本单元">🗑</button>' : ""}
+          </span>`;
+        if (editMode) {
+          header.querySelector(".unit-edit").onclick = (ev) => { ev.stopPropagation(); openUnitEditor(subject, ui, u); };
+          header.querySelector(".unit-title").onclick = (ev) => { ev.stopPropagation(); openUnitEditor(subject, ui, u); };
+          header.querySelector(".unit-del").onclick = (ev) => {
+            ev.stopPropagation();
+            if (!confirm("删除整个单元「" + u.title + "」？该单元下的任务记录也会失效。")) return;
+            materializeIfNeeded();
+            getConfig().subjects.find(s => s.id === subject.id).units.splice(ui, 1);
+            save(); render();
+          };
+        }
+        const body = document.createElement("div");
+        body.className = "card-body";
+        u.tasks.forEach(t => {
+          const full = Object.assign({}, t, { daily: u.daily || t.daily });
+          const st = taskState(full);
+          const pts = t.pts || rules.taskSun;
+          const row = document.createElement("div");
+          row.className = "task" + (st ? " " + st : "");
+          row.innerHTML = `
+            <input type="checkbox" ${st ? "checked" : ""}>
+            <label>${escapeHtml(t.t)}</label>
+            ${full.daily ? '<span class="tag-daily">每日</span>' : ""}
+            <span class="reward-tag">+${pts}☀️</span>
+            <button class="task-edit" title="编辑">✏️</button>
+            <button class="task-del" title="删除">🗑</button>
+          `;
+          row.querySelector("input").onchange = (ev) => toggleTask(full, ev.target.checked);
+          row.querySelector("label").onclick = (ev) => {
+            if (editMode) { ev.preventDefault(); openTaskEditor(subject, ui, t); }
+          };
+          row.querySelector(".task-edit").onclick = () => openTaskEditor(subject, ui, t);
+          row.querySelector(".task-del").onclick = () => {
+            if (!confirm("删除任务「" + t.t + "」？")) return;
+            materializeIfNeeded();
+            const sub = getConfig().subjects.find(s => s.id === subject.id);
+            const idx = sub.units[ui].tasks.findIndex(x => x.id === t.id);
+            if (idx >= 0) sub.units[ui].tasks.splice(idx, 1);
+            save(); render();
+          };
+          body.appendChild(row);
+        });
+        const addRow = document.createElement("div");
+        addRow.className = "add-task-row";
+        addRow.innerHTML = `<button class="btn btn-primary btn-mini">➕ 添加任务</button>`;
+        addRow.querySelector("button").onclick = () => openTaskEditor(subject, ui, null);
+        body.appendChild(addRow);
+        card.appendChild(header);
+        card.appendChild(body);
+        cards.appendChild(card);
+      });
+
+      /* 编辑模式：在学科底部追加 ➕ 添加单元 按钮 */
+      if (editMode) {
+        const addUnitRow = document.createElement("div");
+        addUnitRow.className = "add-unit-row";
+        addUnitRow.innerHTML = `<button class="btn btn-primary" style="width:100%;padding:10px;font-size:15px;">➕ 添加单元</button>`;
+        addUnitRow.querySelector("button").onclick = () => openUnitEditor(subject, null, null);
+        cards.appendChild(addUnitRow);
+      }
+    }
+
+    function renderRewards() {
+      const body = document.getElementById("rewardBody");
+      body.innerHTML = "";
+      const rewards = getConfig().rewards;
+      rewards.forEach(r => {
+        const redeemedCount = state.redeemed[r.id] || 0;
+        const item = document.createElement("div");
+        item.className = "reward-item";
+        item.innerHTML = `
+          <div>
+            <span>${escapeHtml(r.name)}</span><br><small>已兑换 ${redeemedCount} 次</small>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
+            <button class="rw-edit">✏️</button>
+            <button class="rw-del">🗑</button>
+            <button class="btn btn-primary btn-mini" style="background:${state.sun >= r.cost ? "#66bb6a" : "#bdbdbd"}">
+              ${r.cost}☀️ 兑换
+            </button>
+          </div>
+        `;
+        item.querySelector(".rw-edit").onclick = () => openRewardEditor(r);
+        item.querySelector(".rw-del").onclick = () => {
+          if (!confirm("删除奖励「" + r.name + "」？")) return;
+          materializeIfNeeded();
+          const list = getConfig().rewards;
+          const idx = list.findIndex(x => x.id === r.id);
+          if (idx >= 0) list.splice(idx, 1);
+          save(); render();
+        };
+        item.querySelector(".btn-primary").onclick = () => redeemReward(r);
+        body.appendChild(item);
+      });
+      const addRow = document.createElement("div");
+      addRow.className = "add-reward-row";
+      addRow.innerHTML = `<button class="btn btn-primary btn-mini">➕ 添加奖励</button>`;
+      addRow.querySelector("button").onclick = () => openRewardEditor(null);
+      body.appendChild(addRow);
+    }
+
+    function render() {
+      renderHeader();
+      renderPendingBanner();
+      renderNav();
+      renderQuickTasks();
+      renderCards();
+      renderRewards();
+      document.body.classList.toggle("editmode", editMode);
+    }
+
+    /* ============== 任务勾选 / 审核流程 ============== */
+    function toggleTask(t, checked) {
+      const rules = getRules();
+      const pts = t.pts || rules.taskSun;
+      const today = todayStr();
+      const review = state.settings.reviewMode && state.settings.pinHash;
+      if (t.daily) {
+        if (checked) {
+          if (review) {
+            state.dailyPending[t.id] = today;
+            showToast("已记录，等家长确认后获得阳光 📋");
+          } else {
+            state.dailyDone[t.id] = today;
+            addSun(pts, t.t);
+            showToast("完成 +" + pts + "☀️");
+          }
+        } else {
+          if (state.dailyPending[t.id] === today) delete state.dailyPending[t.id];
+          else if (state.dailyDone[t.id] === today) { delete state.dailyDone[t.id]; addSun(-pts, "取消：" + t.t); }
+        }
+      } else {
+        if (checked) {
+          if (review) {
+            state.pending.add(t.id);
+            showToast("已记录，等家长确认后获得阳光 📋");
+          } else {
+            state.done.add(t.id);
+            addSun(pts, t.t);
+            showToast("完成 +" + pts + "☀️");
+          }
+        } else {
+          if (state.pending.has(t.id)) state.pending.delete(t.id);
+          else if (state.done.has(t.id)) { state.done.delete(t.id); addSun(-pts, "取消：" + t.t); }
+        }
+      }
+      save(); render();
+    }
+
+    function confirmPending() {
+      const needPin = state.settings.pinHash;
+      const doConfirm = () => {
+        const rules = getRules();
+        const taskMap = {};
+        allTasks().forEach(t => { taskMap[t.id] = t; });
+        let gained = 0;
+        state.pending.forEach(id => {
+          const t = taskMap[id];
+          if (!t) return;
+          const pts = t.pts || rules.taskSun;
+          state.done.add(id);
+          addSun(pts, "确认：" + t.t);
+          gained += pts;
+        });
+        state.pending.clear();
+        Object.keys(state.dailyPending).forEach(id => {
+          const t = taskMap[id];
+          if (!t) { delete state.dailyPending[id]; return; }
+          const pts = t.pts || rules.taskSun;
+          state.dailyDone[id] = state.dailyPending[id];
+          delete state.dailyPending[id];
+          addSun(pts, "确认：" + t.t);
+          gained += pts;
+        });
+        save(); render();
+        showToast("家长已确认，共发放 " + gained + "☀️ 🎉");
+      };
+      if (needPin) askPin().then(ok => { if (ok) doConfirm(); });
+      else doConfirm();
+    }
+
+    function redeemReward(r) {
+      const doRedeem = () => {
+        if (state.sun < r.cost) { showToast("阳光值还不够哦，继续加油！"); return; }
+        addSun(-r.cost, "兑换：" + r.name);
+        state.redeemed[r.id] = (state.redeemed[r.id] || 0) + 1;
+        save(); render();
+        showToast("兑换成功：" + r.name + "！");
+      };
+      if (state.settings.reviewMode && state.settings.pinHash) {
+        askPin().then(ok => { if (ok) doRedeem(); });
+      } else doRedeem();
+    }
+
+    function checkIn() {
+      const rules = getRules();
+      if (state.lastCheckIn === todayStr()) return;
+      const yesterday = new Date(Date.now() - 86400000).toLocaleDateString("zh-CN");
+      if (state.lastCheckIn === yesterday) state.streak++;
+      else state.streak = 1;
+      state.lastCheckIn = todayStr();
+      addSun(rules.checkinSun, "每日打卡（连续" + state.streak + "天）");
+      save(); render();
+      showToast("打卡成功！连续 " + state.streak + " 天 +" + rules.checkinSun + "☀️");
+    }
+
+    /* ============== 弹窗系统 ============== */
+    const modalMask = document.getElementById("modalMask");
+    function openModal(title, bodyHTML) {
+      document.getElementById("modalTitle").textContent = title;
+      document.getElementById("modalBody").innerHTML = bodyHTML;
+      modalMask.classList.add("show");
+    }
+    function closeModal() { modalMask.classList.remove("show"); }
+    document.getElementById("modalClose").onclick = closeModal;
+    modalMask.onclick = (ev) => { if (ev.target === modalMask) closeModal(); };
+
+    /* 「刚通过 PIN 验证」凭据窗口：5 秒内进入设置面板不再重弹 PIN，避免"修改/清除 PIN 后回退"被自己挡掉。
+       这只是个内存变量，不写入状态；切到其他页面或浏览器重启就过期。 */
+    let pinOkUntil = 0;
+    function pinJustOk() { return Date.now() < pinOkUntil; }
+
+    function askPin() {
+      return new Promise(resolve => {
+        openModal("🔐 家长验证", `
+          <div class="form-row"><label>家长 PIN 码</label><input type="password" id="pinInput" maxlength="8" autofocus placeholder="4-8 位数字"></div>
+          <div class="hint">PIN 码在 ⚙️ 设置中管理，孩子完成任务的阳光发放需要家长验证。</div>
+          <div class="modal-actions">
+            <button class="btn btn-ghost" id="pinCancel">取消</button>
+            <button class="btn btn-primary" id="pinOk">确认</button>
+          </div>`);
+        const input = document.getElementById("pinInput");
+        input.focus();
+        const ok = () => {
+          const good = hashPin(input.value) === state.settings.pinHash;
+          closeModal();
+          if (!good) showToast("PIN 码不正确");
+          else pinOkUntil = Date.now() + 5000; // 通过：开 5 秒凭据窗口
+          resolve(good);
+        };
+        document.getElementById("pinOk").onclick = ok;
+        document.getElementById("pinCancel").onclick = () => { closeModal(); resolve(false); };
+        input.onkeydown = (ev) => { if (ev.key === "Enter") ok(); };
+      });
+    }
+
+    /* ============== 编辑器 ============== */
+    function materializeIfNeeded() {
+      if (!(state.custom && state.custom.subjects)) {
+        state.custom = materializeCustom();
+      }
+    }
+
+    function openTaskEditor(subject, unitIndex, task) {
+      const rules = getRules();
+      const isNew = !task;
+      const t = task || { t: "", pts: rules.taskSun, daily: false };
+      openModal(isNew ? "➕ 添加任务" : "✏️ 编辑任务", `
+        <div class="form-row"><label>任务名称</label><input type="text" id="teName" maxlength="40" value="${escapeHtml(t.t)}" placeholder="如：背诵《登鹳雀楼》"></div>
+        <div class="form-row"><label>阳光值</label><input type="number" id="tePts" min="1" max="99" value="${t.pts || rules.taskSun}"></div>
+        <div class="form-row"><label>每日重复</label><input type="checkbox" id="teDaily" ${t.daily ? "checked" : ""}>
+          <span class="hint" style="margin:0;">勾选后每天重置，适合习惯类任务</span></div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="teCancel">取消</button>
+          <button class="btn btn-primary" id="teSave">保存</button>
+        </div>`);
+      document.getElementById("teCancel").onclick = closeModal;
+      document.getElementById("teSave").onclick = () => {
+        const name = document.getElementById("teName").value.trim();
+        const pts = parseInt(document.getElementById("tePts").value, 10) || rules.taskSun;
+        const daily = document.getElementById("teDaily").checked;
+        if (!name) { showToast("任务名称不能为空"); return; }
+        materializeIfNeeded();
+        const sub = getConfig().subjects.find(s => s.id === subject.id);
+        const unit = sub.units[unitIndex];
+        if (isNew) {
+          unit.tasks.push({ id: uid(), t: name, pts: pts, daily: daily || undefined });
+        } else {
+          const idx = unit.tasks.findIndex(x => x.id === task.id);
+          const updated = { id: task.id, t: name, pts: pts };
+          if (daily || unit.daily) updated.daily = true;
+          unit.tasks[idx >= 0 ? idx : unit.tasks.length] = updated;
+        }
+        save(); closeModal(); render();
+        showToast(isNew ? "任务已添加 ✅" : "任务已更新 ✅");
+      };
+    }
+
+    function openUnitEditor(subject, unitIndex, unit) {
+      const isNew = unitIndex === null || unitIndex === undefined;
+      const u = unit ? Object.assign({}, unit) : { title: "", daily: false, tasks: [] };
+      openModal(isNew ? "➕ 添加单元" : "✏️ 编辑单元", `
+        <div class="form-row"><label>单元名称</label><input type="text" id="ueName" maxlength="40" value="${escapeHtml(u.title || "")}" placeholder="如：第九单元 · 我的新单元"></div>
+        <div class="form-row"><label>每日重置</label><input type="checkbox" id="ueDaily" ${u.daily ? "checked" : ""}>
+          <span class="hint" style="margin:0;">勾选后本单元的任务每天都重置打卡（适合习惯养成）</span></div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="ueCancel">取消</button>
+          <button class="btn btn-primary" id="ueSave">保存</button>
+        </div>`);
+      document.getElementById("ueCancel").onclick = closeModal;
+      document.getElementById("ueName").focus();
+      document.getElementById("ueSave").onclick = () => {
+        const name = document.getElementById("ueName").value.trim();
+        const daily = document.getElementById("ueDaily").checked;
+        if (!name) { showToast("单元名称不能为空"); return; }
+        materializeIfNeeded();
+        const sub = getConfig().subjects.find(s => s.id === subject.id);
+        if (isNew) {
+          /* 新单元追加到末尾，自动编号（按当前数量 + 1） */
+          const newUnit = { title: name, tasks: [] };
+          if (daily) newUnit.daily = true;
+          sub.units.push(newUnit);
+        } else {
+          sub.units[unitIndex].title = name;
+          if (daily) sub.units[unitIndex].daily = true;
+          else delete sub.units[unitIndex].daily;
+        }
+        save(); closeModal(); render();
+        showToast(isNew ? "单元已添加 ✅" : "单元已更新 ✅");
+      };
+    }
+
+    const SUBJECT_COLORS = ["#ef5350","#42a5f5","#ab47bc","#26a69a","#ff7043","#66bb6a","#ec407a","#8d6e63","#5c6bc0","#78909c"];
+    function openSubjectEditor(subject, index) {
+      const isNew = index === null || index === undefined;
+      const s = subject ? Object.assign({}, subject) : { name: "", icon: "📚", color: SUBJECT_COLORS[0], units: [] };
+      const colorBtns = SUBJECT_COLORS.map(c =>
+        `<button type="button" class="color-btn" data-color="${c}" style="width:28px;height:28px;border-radius:50%;border:3px solid ${s.color === c ? "#333" : "transparent"};background:${c};cursor:pointer;padding:0;" title="${c}"></button>`
+      ).join("");
+      openModal(isNew ? "➕ 添加学科" : "✏️ 编辑学科", `
+        <div class="form-row"><label>学科名称</label><input type="text" id="seName" maxlength="20" value="${escapeHtml(s.name || "")}" placeholder="如：语文"></div>
+        <div class="form-row"><label>学科图标</label><input type="text" id="seIcon" maxlength="4" value="${escapeHtml(s.icon || "")}" placeholder="如：📖" style="width:60px;text-align:center;font-size:20px;"></div>
+        <div class="form-row"><label>颜色</label><div id="seColors" style="display:flex;gap:6px;flex-wrap:wrap;">${colorBtns}</div></div>
+        <div class="form-row" id="seOrderRow" style="${isNew ? "display:none" : ""}">
+          <button class="btn btn-ghost" id="seUp">▲ 上移</button>
+          <button class="btn btn-ghost" id="seDown">▼ 下移</button>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="seCancel">取消</button>
+          ${!isNew && getConfig().subjects.length > 1 ? '<button class="btn btn-ghost" id="seDel" style="color:#d32f2f;border-color:#ffcdd2;">🗑 删除</button>' : ""}
+          <button class="btn btn-primary" id="seSave">保存</button>
+        </div>`);
+      /* 颜色选择 */
+      let pickedColor = s.color || SUBJECT_COLORS[0];
+      document.querySelectorAll("#seColors .color-btn").forEach(btn => {
+        btn.onclick = () => {
+          pickedColor = btn.dataset.color;
+          document.querySelectorAll("#seColors .color-btn").forEach(b => b.style.borderColor = "transparent");
+          btn.style.borderColor = "#333";
+        };
+      });
+      /* 上移下移 */
+      if (!isNew) {
+        document.getElementById("seUp").onclick = () => {
+          if (index <= 0) return;
+          materializeIfNeeded();
+          const subs = getConfig().subjects;
+          const tmp = subs[index]; subs[index] = subs[index - 1]; subs[index - 1] = tmp;
+          save(); render(); closeModal();
+          showToast("学科已上移 ✅");
+        };
+        document.getElementById("seDown").onclick = () => {
+          if (index >= getConfig().subjects.length - 1) return;
+          materializeIfNeeded();
+          const subs = getConfig().subjects;
+          const tmp = subs[index]; subs[index] = subs[index + 1]; subs[index + 1] = tmp;
+          save(); render(); closeModal();
+          showToast("学科已下移 ✅");
+        };
+      }
+      /* 删除 */
+      const delBtn = document.getElementById("seDel");
+      if (delBtn) {
+        delBtn.onclick = () => {
+          if (!confirm("删除学科「" + s.name + "」？该学科下的所有单元和任务记录都会被清除。")) return;
+          materializeIfNeeded();
+          const subs = getConfig().subjects;
+          subs.splice(index, 1);
+          if (currentSubjectId === s.id) currentSubjectId = subs[0].id;
+          save(); closeModal(); render();
+          showToast("学科已删除 ✅");
+        };
+      }
+      document.getElementById("seCancel").onclick = closeModal;
+      document.getElementById("seName").focus();
+      document.getElementById("seSave").onclick = () => {
+        const name = document.getElementById("seName").value.trim();
+        const icon = document.getElementById("seIcon").value.trim() || "📚";
+        if (!name) { showToast("学科名称不能为空"); return; }
+        materializeIfNeeded();
+        const subs = getConfig().subjects;
+        if (isNew) {
+          const newSub = { id: uid(), name: name, icon: icon, color: pickedColor, units: [] };
+          subs.push(newSub);
+          currentSubjectId = newSub.id;
+        } else {
+          subs[index].name = name;
+          subs[index].icon = icon;
+          subs[index].color = pickedColor;
+        }
+        save(); closeModal(); render();
+        showToast(isNew ? "学科已添加 ✅" : "学科已更新 ✅");
+      };
+    }
+
+    function openRewardEditor(reward) {
+      const isNew = !reward;
+      const r = reward || { name: "", cost: 100 };
+      openModal(isNew ? "➕ 添加奖励" : "✏️ 编辑奖励", `
+        <div class="form-row"><label>奖励名称</label><input type="text" id="reName" maxlength="30" value="${escapeHtml(r.name)}" placeholder="如：看一集动画片"></div>
+        <div class="form-row"><label>所需阳光</label><input type="number" id="reCost" min="1" max="9999" value="${r.cost}"></div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="reCancel">取消</button>
+          <button class="btn btn-primary" id="reSave">保存</button>
+        </div>`);
+      document.getElementById("reCancel").onclick = closeModal;
+      document.getElementById("reSave").onclick = () => {
+        const name = document.getElementById("reName").value.trim();
+        const cost = parseInt(document.getElementById("reCost").value, 10) || 100;
+        if (!name) { showToast("奖励名称不能为空"); return; }
+        materializeIfNeeded();
+        const list = getConfig().rewards;
+        if (isNew) list.push({ id: uid(), name: name, cost: cost });
+        else {
+          const idx = list.findIndex(x => x.id === reward.id);
+          list[idx >= 0 ? idx : list.length] = { id: reward.id, name: name, cost: cost };
+        }
+        save(); closeModal(); render();
+        showToast(isNew ? "奖励已添加 ✅" : "奖励已更新 ✅");
+      };
+    }
+
+    function enterEditMode() {
+      const start = () => {
+        materializeIfNeeded();
+        editMode = true;
+        render();
+        showToast("编辑模式：点 ✏️ 改任务，点 ➕ 加任务，完成后再点右上角");
+      };
+      if (state.settings.pinHash) askPin().then(ok => { if (ok) start(); });
+      else start();
+    }
+    function exitEditMode() {
+      editMode = false;
+      render();
+    }
+
+    /* ============== 积分流水 ============== */
+    function openLedger() {
+      const rows = state.ledger.slice(-100).reverse().map(e => `
+        <div class="ledger-row">
+          <div>
+            <div>${escapeHtml(e.r || "阳光变动")}</div>
+            <div class="ledger-time">${fmtTime(e.t)}</div>
+          </div>
+          <div class="${e.d >= 0 ? "gain" : "cost"}">${e.d >= 0 ? "+" + e.d : e.d}☀️</div>
+        </div>`).join("");
+      openModal("📊 阳光流水账（最近 100 笔）", rows || "<div class='hint'>还没有记录，完成任务后就会出现在这里。</div>");
+    }
+
+    /* ============== 设置 ============== */
+    function openSettings() {
+      /* 安全闸门：已设 PIN 时先验证；验证后 5 秒内复用 pinJustOk()，避免"修改/清除 PIN 后回退"被自己挡掉 */
+      if (state.settings.pinHash && !pinJustOk()) {
+        askPin().then(ok => { if (ok) openSettings(); });
+        return;
+      }
+      const rules = getRules();
+      const s = state.settings;
+      const sync = state.sync;
+      openModal("⚙️ 设置", `
+        <h4>🎯 积分规则</h4>
+        <div class="form-row"><label>任务阳光</label><input type="number" id="setTaskSun" min="1" max="50" value="${rules.taskSun}">☀️ / 项</div>
+        <div class="form-row"><label>打卡阳光</label><input type="number" id="setCheckinSun" min="1" max="200" value="${rules.checkinSun}">☀️ / 天</div>
+
+        <h4>🔐 家长模式</h4>
+        <div class="form-row"><label>审核模式</label><input type="checkbox" id="setReview" ${s.reviewMode ? "checked" : ""}>
+          <span class="hint" style="margin:0;">开启后孩子勾选的任务需家长输 PIN 确认才发阳光，兑换也需验证</span></div>
+        <div class="form-row"><label>PIN 码</label>
+          <button class="btn btn-ghost btn-mini" id="setPinBtn">${s.pinHash ? "修改 PIN" : "设置 PIN"}</button>
+          ${s.pinHash ? '<button class="btn btn-ghost btn-mini" id="clearPinBtn">清除</button>' : ""}
+        </div>
+        ${s.pinHash ? "" : '<div class="hint">先设置 PIN 码，审核模式才会生效。</div>'}
+
+        <h4>☀️ 手动调整阳光</h4>
+        <div class="form-row"><label>调整值</label><input type="number" id="adjVal" value="10" style="max-width:90px;">
+          <input type="text" id="adjReason" placeholder="原因（如：额外奖励）" style="flex:1;min-width:140px;">
+          <button class="btn btn-warn btn-mini" id="adjAdd">➕ 加</button>
+          <button class="btn btn-ghost btn-mini" id="adjSub">➖ 扣</button></div>
+
+        <h4>💾 数据备份</h4>
+        <div class="section-note">localStorage 每次修改自动保存；每 20 秒自动往 IndexedDB 存一份快照（保留 ${SNAPSHOT_KEEP} 份），清缓存后可恢复。</div>
+        <div class="form-row">
+          <button class="btn btn-ghost btn-mini" id="snapNowBtn">立即备份</button>
+          <button class="btn btn-ghost btn-mini" id="snapListBtn">查看 / 恢复备份</button>
+          <button class="btn btn-ghost btn-mini" id="exportBtn2">⬇ 导出文件</button>
+          <button class="btn btn-ghost btn-mini" id="importBtn2">⬆ 导入文件</button>
+          <button class="btn btn-ghost btn-mini" id="cleanLegacyBtn">🧹 清理老版本遗留 <small>v3.0</small></button>
+          <input type="file" id="importFile" accept="application/json" style="display:none">
+        </div>
+        <div class="hint">🧹 清理老版本遗留：扫描本地是否残留旧版本/旧项目的数据，可勾选后删除（不影响当前 v2 数据与备份快照）。</div>
+        ${state.settings.lastExport ? '<div class="hint">上次导出：' + escapeHtml(state.settings.lastExport) + "</div>" : ""}
+
+        <h4>☁️ 云同步（多设备）</h4>
+        ${sync ? `
+          <div class="hint">家庭云空间已绑定${sync.backend === "lan" ? "（🏠 局域网家庭云 · 电脑需保持运行）" : "（🌐 公司电脑同步 · 每次打开自动从 GitHub 取最新地址）"}${sync.backend === "lan" && sync.base ? "，服务器：" + escapeHtml(sync.base) : ""}。把下面的家庭码输入到其他设备的「加入家庭云空间」即可同步。</div>
+          <div class="code-box">${escapeHtml(sync.bucket)}</div>
+          <div class="form-row">
+            <label>自动同步</label><input type="checkbox" id="syncAuto" ${sync.auto ? "checked" : ""}>
+            <span class="hint" style="margin:0;">修改后 15 秒自动上传</span>
+          </div>
+          <div class="form-row">
+            <button class="btn btn-primary btn-mini" id="syncSmart">🔄 立即同步</button>
+            <button class="btn btn-ghost btn-mini" id="syncUp">仅上传</button>
+            <button class="btn btn-ghost btn-mini" id="syncDown">仅下载</button>
+            <button class="btn btn-ghost btn-mini" id="syncUnbind">解除绑定</button>
+          </div>
+          ${sync.lastSync ? '<div class="hint">上次同步：' + fmtTime(sync.lastSync) + "</div>" : ""}
+        ` : `
+          <div class="form-row">
+            <label>同步服务</label>
+            <select id="syncBackend">
+              <option value="lan">🏠 局域网家庭云（自家 WiFi · 免费永久）</option>
+              <option value="cpolar">🌐 公司电脑同步（GitHub 自动取址 · 24h 在线）</option>
+            </select>
+          </div>
+          <div id="lanConf">
+            <div class="hint">🏠 局域网家庭云 = 用家里电脑当同步服务器：永久免费、数据不出家门、永不跑路。先在电脑上双击页面同目录的「启动家庭云同步」图标（本机保持默认地址即可），其他设备再填电脑显示的地址。</div>
+            <div class="form-row">
+              <label>服务器地址</label><input type="text" id="lanServer" placeholder="http://127.0.0.1:8787" value="${escapeHtml((state.settings.lan && state.settings.lan.server) || LAN_DEFAULT)}">
+            </div>
+            <div class="hint">电脑上保持默认 http://127.0.0.1:8787；平板 / 手机（连同一 WiFi）改成启动窗口里显示的地址，形如 http://192.168.1.5:8787。</div>
+          </div>
+          <div id="cpolarConf" style="display:none;">
+            <div class="hint">🌐 公司电脑同步：数据存在公司 24h 开机电脑上。公司电脑会每 10 分钟自动把最新 cpolar 隧道地址推送到 GitHub「地址公告板」，页面每次打开自动从这里取最新地址并同步——隧道地址怎么变都不用管。此栏填的就是那个公告板地址（所有设备填同一个）。</div>
+            <div class="form-row">
+              <label>地址文件链接</label><input type="text" id="cpolarAddr" placeholder="https://raw.githubusercontent.com/用户名/仓库名/HEAD/cpolar-addr.json" value="${escapeHtml((state.settings.cpolar && state.settings.cpolar.addr) || "")}">
+            </div>
+            <div class="hint">格式：<b>https://raw.githubusercontent.com/GitHub用户名/仓库名/HEAD/cpolar-addr.json</b>（公司电脑部署包 README 里有完整获取步骤）。数据走平板 ↔ 公司电脑直连，GitHub 只传这一行地址。</div>
+          </div>
+          <div class="form-row">
+            <button class="btn btn-primary btn-mini" id="syncCreate">🏠 创建家庭云空间</button>
+          </div>
+          <div class="form-row">
+            <label>家庭码</label><input type="text" id="syncJoinCode" placeholder="在电脑上生成的家庭码">
+            <button class="btn btn-ghost btn-mini" id="syncJoin">加入</button>
+          </div>
+          <div class="hint">创建后会得到一串家庭码；手机 / 平板 / 电脑打开本页，填同一组凭证并输入同一家庭码即数据互通。数据只存任务打卡和阳光数，不含隐私信息。</div>
+        `}
+
+        <h4>⚠️ 恢复默认内容</h4>
+        <div class="form-row">
+          <button class="btn btn-ghost btn-mini" id="resetContentBtn">恢复默认教材任务</button>
+          <span class="hint" style="margin:0;">清除自定义任务/奖励，恢复为二年级默认内容（进度数据保留）</span>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn btn-primary" id="setClose">完成</button>
+        </div>`);
+
+      /* 积分规则 */
+      document.getElementById("setTaskSun").onchange = (ev) => {
+        state.rules = Object.assign({}, state.rules, { taskSun: Math.max(1, parseInt(ev.target.value, 10) || 5) });
+        save(); render();
+      };
+      document.getElementById("setCheckinSun").onchange = (ev) => {
+        state.rules = Object.assign({}, state.rules, { checkinSun: Math.max(1, parseInt(ev.target.value, 10) || 20) });
+        save(); render();
+      };
+
+      /* 家长模式 */
+      document.getElementById("setReview").onchange = (ev) => {
+        state.settings.reviewMode = ev.target.checked;
+        save(); render();
+      };
+      document.getElementById("setPinBtn").onclick = () => {
+        openModal("🔐 设置 PIN 码", `
+          <div class="form-row"><label>新 PIN 码</label><input type="password" id="newPin1" maxlength="8" placeholder="4-8 位数字"></div>
+          <div class="form-row"><label>再输一次</label><input type="password" id="newPin2" maxlength="8" placeholder="重复输入"></div>
+          <div class="hint">请家长保管好 PIN 码。忘记可用「清除」重设（需旧 PIN 或清除浏览器数据）。</div>
+          <div class="modal-actions">
+            <button class="btn btn-ghost" id="npCancel">取消</button>
+            <button class="btn btn-primary" id="npSave">保存</button>
+          </div>`);
+        document.getElementById("npCancel").onclick = () => { closeModal(); openSettings(); };
+        document.getElementById("npSave").onclick = () => {
+          const p1 = document.getElementById("newPin1").value;
+          const p2 = document.getElementById("newPin2").value;
+          if (!/^\d{4,8}$/.test(p1)) { showToast("PIN 需为 4-8 位数字"); return; }
+          if (p1 !== p2) { showToast("两次输入不一致"); return; }
+          state.settings.pinHash = hashPin(p1);
+          save();
+          closeModal(); openSettings();
+          showToast("PIN 码已保存 ✅");
+        };
+      };
+      const clearPin = document.getElementById("clearPinBtn");
+      if (clearPin) clearPin.onclick = () => {
+        askPin().then(ok => {
+          if (!ok) return;
+          state.settings.pinHash = "";
+          state.settings.reviewMode = false;
+          save(); render(); closeModal(); openSettings();
+          showToast("PIN 已清除");
+        });
+      };
+
+      /* 手动调整 */
+      document.getElementById("adjAdd").onclick = () => doAdjust(1);
+      document.getElementById("adjSub").onclick = () => doAdjust(-1);
+      function doAdjust(sign) {
+        const v = parseInt(document.getElementById("adjVal").value, 10) || 0;
+        const reason = document.getElementById("adjReason").value.trim() || "家长手动调整";
+        if (v <= 0) { showToast("请输入大于 0 的调整值"); return; }
+        addSun(sign * v, reason);
+        save(); render();
+        showToast((sign > 0 ? "已加 " : "已扣 ") + v + "☀️");
+      }
+
+      /* 备份 */
+      document.getElementById("snapNowBtn").onclick = async () => {
+        await takeSnapshot();
+        showToast("已备份到本地快照 ✅");
+      };
+      document.getElementById("snapListBtn").onclick = openSnapshots;
+      document.getElementById("exportBtn2").onclick = exportData;
+      document.getElementById("importBtn2").onclick = () => document.getElementById("importFile").click();
+      document.getElementById("importFile").onchange = (ev) => {
+        const file = ev.target.files[0];
+        if (file) importData(file);
+        ev.target.value = "";
+      };
+      document.getElementById("cleanLegacyBtn").onclick = openCleanLegacy;
+
+      /* 云同步 */
+      if (sync) {
+        document.getElementById("syncAuto").onchange = (ev) => {
+          state.sync.auto = ev.target.checked;
+          save();
+          if (ev.target.checked) startPolling(); else stopPolling();
+        };
+        document.getElementById("syncSmart").onclick = () => smartSync();
+        document.getElementById("syncUp").onclick = () => syncPush(false);
+        document.getElementById("syncDown").onclick = () => syncPull(false, false, false);
+        document.getElementById("syncUnbind").onclick = () => {
+          if (!confirm("解除云同步绑定？本地数据保留。")) return;
+          state.sync = null;
+          stopPolling();
+          save(); closeModal(); openSettings();
+          showToast("已解除绑定");
+        };
+      } else {
+        /* 后端切换 → 显隐对应配置区（lan / cpolar） */
+        const beSel = document.getElementById("syncBackend");
+        const lanBox = document.getElementById("lanConf");
+        const cpolarBox = document.getElementById("cpolarConf");
+        function lanServer() {
+          const v = (document.getElementById("lanServer").value || "").trim().replace(/\/+$/, "");
+          return v || LAN_DEFAULT;
+        }
+        function saveLanServer() {
+          state.settings.lan = Object.assign({}, state.settings.lan || {}, { server: lanServer() });
+          save();
+        }
+        function backendFromUI() { return beSel.value; }
+        function saveCpolarAddr() {
+          const v = (document.getElementById("cpolarAddr").value || "").trim();
+          state.settings.cpolar = Object.assign({}, state.settings.cpolar || {}, { addr: v });
+          save();
+        }
+        function applyBackendUI() {
+          const be = beSel.value;
+          lanBox.style.display = be === "lan" ? "" : "none";
+          cpolarBox.style.display = be === "cpolar" ? "" : "none";
+        }
+        beSel.value = "lan"; /* 默认局域网家庭云 */
+        beSel.onchange = applyBackendUI;
+        applyBackendUI();
+
+        document.getElementById("syncCreate").onclick = async () => {
+          const backend = backendFromUI();
+          saveLanServer();
+          if (backend === "cpolar") saveCpolarAddr();
+          try {
+            showToast("正在创建家庭云空间…");
+            const bucket = await cloudCreate(backend, buildSyncPayload(), lanServer());
+            state.sync = { backend: backend, bucket: bucket, auto: true, lastSync: Date.now(), base: (backend === "lan") ? lanServer() : "" };
+            save();
+            startPolling();
+            showToast("创建成功！家庭码：" + bucket + " ☁️");
+            closeModal(); openSettings();
+          } catch (e) {
+            showToast(backend === "lan"
+              ? "创建失败：" + (e.message || "网络错误") + "。请确认已双击「启动家庭云同步」图标、地址正确、电脑防火墙未拦截。"
+              : "创建失败：" + (e.message || "网络错误") + "。请确认：地址文件链接填对了、公司电脑上报任务已运行（GitHub 上已有最新地址）、公司电脑同步服务器和 cpolar 隧道在线。");
+            console.warn(e);
+          }
+        };
+        document.getElementById("syncJoin").onclick = async () => {
+          const code = document.getElementById("syncJoinCode").value.trim();
+          if (!code) { showToast("请输入家庭码"); return; }
+          const backend = backendFromUI();
+          saveLanServer();
+          if (backend === "cpolar") saveCpolarAddr();
+          state.sync = { backend: backend, bucket: code, auto: true, lastSync: 0, base: (backend === "lan") ? lanServer() : "" };
+          try {
+            await syncPull(false);
+            showToast("已加入并同步 ✅");
+            closeModal(); render();
+            startPolling();
+          } catch (e) {
+            state.sync = null;
+            const m = (e && e.message) || "";
+            showToast(m && /该家庭码当前是空的/.test(m)
+              ? m
+              : (backend === "cpolar"
+                ? "同步失败：请确认地址文件链接正确、公司电脑上报任务已运行、同步服务器和 cpolar 隧道在线、家庭码正确"
+                : "同步失败：家庭码或服务器地址不对，或电脑端未启动"));
+          }
+          save();
+        };
+      }
+
+      /* 恢复默认内容 */
+      document.getElementById("resetContentBtn").onclick = () => {
+        if (!confirm("恢复默认二年级教材任务和奖励？自定义内容将被清除，完成进度保留。")) return;
+        state.custom = null;
+        state.rules = null;
+        save(); render(); closeModal();
+        showToast("已恢复默认内容 ✅");
+      };
+
+      document.getElementById("setClose").onclick = closeModal;
+    }
+
+    async function openSnapshots() {
+      try {
+        const db = await openBackupDB();
+        const snaps = await new Promise((resolve, reject) => {
+          const req = db.transaction("snaps", "readonly").objectStore("snaps").getAll();
+          req.onsuccess = () => resolve(req.result || []);
+          req.onerror = () => reject(req.error);
+        });
+        snaps.sort((a, b) => b.ts - a.ts);
+        const rows = snaps.slice(0, 12).map(sn => `
+          <div class="snap-row">
+            <div>${fmtTime(sn.ts)}<br><small style="color:var(--muted)">☀️ ${sn.sun}</small></div>
+            <button class="btn btn-warn btn-mini" data-ts="${sn.ts}">恢复</button>
+          </div>`).join("");
+        openModal("💾 本地快照备份（最近 12 份）", (rows || '<div class="hint">还没有快照，点「立即备份」生成。</div>') +
+          `<div class="modal-actions"><button class="btn btn-ghost" id="snapBack">返回设置</button></div>`);
+        document.querySelectorAll(".snap-row button[data-ts]").forEach(btn => {
+          btn.onclick = () => {
+            const sn = snaps.find(x => x.ts === Number(btn.dataset.ts));
+            if (!sn) return;
+            if (!confirm("恢复到 " + fmtTime(sn.ts) + " 的快照？当前进度会被覆盖（会先自动再备份一份）。")) return;
+            takeSnapshot().then(() => {
+              adoptState(sn.data);
+              save(); render(); closeModal();
+              document.getElementById("studentName").value = state.name;
+              showToast("已恢复快照 ✅");
+            });
+          };
+        });
+        const back = document.getElementById("snapBack");
+        if (back) back.onclick = openSettings;
+      } catch (e) {
+        showToast("读取快照失败");
+        console.warn(e);
+      }
+    }
+
+    /* ============== 清理老版本遗留数据 ==============
+       扫描 localStorage 多余 key + IndexedDB 多余库，给用户勾选后删除。
+       永远不碰白名单（当前活跃的 STORAGE_KEY / CPOLAR_ADDR_KEY / sunnyBackups）。
+       设计要点：
+         1. 仅扫描 + 列出，不自动删——所有删除都必须用户二次确认
+         2. IndexedDB 删除是异步的，被打开时浏览器会触发 onblocked；本实现先尝试 close() 再删，
+            onblocked 时降级为「忽略」并提示用户先关掉其它标签页
+         3. localStorage 按字符串字节长度估算大小（中文 UTF-8 占 3 字节，Math.max 兜底按 1） */
+    const LEGACY_KEEP_LS = [STORAGE_KEY, CPOLAR_ADDR_KEY];
+    const LEGACY_KEEP_IDB = ["sunnyBackups"];
+    /* 智能分类：标识是不是「疑似遗留」（v1/老项目/通用 key） */
+    function classifyLsKey(k) {
+      if (LEGACY_KEEP_LS.indexOf(k) >= 0) return "active";
+      if (/^njGrade2Workbench/i.test(k)) return "legacy-version"; /* v1 / v0 / 任何老版本 */
+      if (/^(leancloud|kvdb|sunnyKvdb|sunnyLc|sync_)/i.test(k)) return "legacy-remote"; /* 已废弃的远程后端残留 */
+      if (/^(sunny|sun_|nj_)/i.test(k)) return "maybe-related"; /* 同前缀：可能相关，不一定 */
+      return "unrelated"; /* 与本项目无关的其他站点 key（用户自家 cookie 类） */
+    }
+    function classifyIdbName(n) {
+      if (LEGACY_KEEP_IDB.indexOf(n) >= 0) return "active";
+      if (/^(sunny|snj|nj)/i.test(n)) return "legacy-app";
+      return "unrelated";
+    }
+    function lsBytesRough(s) {
+      /* UTF-8 中文字符 3 字节，ASCII 1 字节；这里只是给用户看量级 */
+      let n = 0;
+      for (let i = 0; i < s.length; i++) {
+        const c = s.charCodeAt(i);
+        n += c < 0x80 ? 1 : (c < 0x800 ? 2 : 3);
+      }
+      return n;
+    }
+    function fmtBytes(n) {
+      if (n < 1024) return n + " B";
+      if (n < 1024 * 1024) return (n / 1024).toFixed(1) + " KB";
+      return (n / 1024 / 1024).toFixed(2) + " MB";
+    }
+    async function countIdbRecords(name) {
+      let count = 0;
+      let stores = [];
+      try {
+        const db = await new Promise((resolve, reject) => {
+          const req = indexedDB.open(name);
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        });
+        stores = Array.from(db.objectStoreNames);
+        for (const sn of stores) {
+          await new Promise((resolve, reject) => {
+            try {
+              const tx = db.transaction(sn, "readonly");
+              const r = tx.objectStore(sn).count();
+              r.onsuccess = () => { count += r.result; resolve(); };
+              r.onerror = () => reject(r.error);
+            } catch (e) { resolve(); /* 某些 store 可能已被其它标签页独占 */ }
+          });
+        }
+        db.close();
+      } catch (e) { return { count: -1, stores, err: String(e && e.message || e) }; }
+      return { count, stores };
+    }
+    async function scanLegacyData() {
+      const lsItems = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!k) continue;
+        const cat = classifyLsKey(k);
+        if (cat === "active") continue;
+        const v = localStorage.getItem(k) || "";
+        lsItems.push({ key: k, bytes: lsBytesRough(v), cat });
+      }
+      /* IndexedDB.databases() 在主流浏览器都已支持；不支持时返回空数组 */
+      let dbs = [];
+      try { dbs = (await indexedDB.databases()) || []; } catch (e) { dbs = []; }
+      const idbItems = [];
+      for (const d of dbs) {
+        if (!d || !d.name) continue;
+        const cat = classifyIdbName(d.name);
+        if (cat === "active") continue;
+        const info = await countIdbRecords(d.name);
+        idbItems.push({ name: d.name, count: info.count, stores: info.stores, cat, err: info.err });
+      }
+      return { lsItems, idbItems };
+    }
+    function escapeAttr(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+    function catLabel(cat) {
+      return ({
+        "legacy-version": "🕰 旧版本",
+        "legacy-remote": "☁️ 已废弃后端",
+        "legacy-app": "🕰 同名旧库",
+        "maybe-related": "❓ 可能相关",
+        "unrelated": "🌐 其它站点"
+      })[cat] || cat;
+    }
+    function openCleanLegacy() {
+      openModal("🧹 清理老版本遗留数据 v3.0", `
+        <div class="hint">正在扫描 localStorage 与 IndexedDB…</div>
+        <div class="modal-actions"><button class="btn btn-ghost" id="clCancel">返回设置</button></div>
+      `);
+      const cancel0 = document.getElementById("clCancel");
+      if (cancel0) cancel0.onclick = openSettings;
+      scanLegacyData().then(({ lsItems, idbItems }) => {
+        const lsRows = lsItems.map(it => `
+          <label class="legacy-row" data-kind="ls" data-key="${escapeAttr(it.key)}">
+            <input type="checkbox" class="clLsChk" data-key="${escapeAttr(it.key)}" checked>
+            <div>
+              <div><b>${escapeHtml(it.key)}</b> <span class="cat-tag">${catLabel(it.cat)}</span></div>
+              <small style="color:var(--muted)">localStorage · ${fmtBytes(it.bytes)}</small>
+            </div>
+          </label>`).join("");
+        const idbRows = idbItems.map(it => `
+          <label class="legacy-row" data-kind="idb" data-name="${escapeAttr(it.name)}">
+            <input type="checkbox" class="clIdbChk" data-name="${escapeAttr(it.name)}" checked>
+            <div>
+              <div><b>${escapeHtml(it.name)}</b> <span class="cat-tag">${catLabel(it.cat)}</span></div>
+              <small style="color:var(--muted)">IndexedDB · ${it.count < 0 ? "⚠️ " + escapeHtml(it.err || "无法读取") : it.count + " 条 · store: " + (it.stores.join(", ") || "—")}</small>
+            </div>
+          </label>`).join("");
+        const total = lsItems.length + idbItems.length;
+        const body = `
+          <div class="hint">
+            扫描结果：<b>${lsItems.length}</b> 条 localStorage、<b>${idbItems.length}</b> 个 IndexedDB 库。
+            白名单（${LEGACY_KEEP_LS.join(", ")} / ${LEGACY_KEEP_IDB.join(", ")}）已自动跳过。
+          </div>
+          ${total === 0 ? `
+            <div class="empty-tip">✨ 没发现遗留数据，无需清理。</div>
+          ` : `
+            <div class="form-row">
+              <button class="btn btn-ghost btn-mini" id="clSelAll">全选</button>
+              <button class="btn btn-ghost btn-mini" id="clSelNone">全不选</button>
+              <button class="btn btn-ghost btn-mini" id="clSelLegacy">仅选旧版本</button>
+              <span class="hint" style="margin:0;">勾选要清理的项目</span>
+            </div>
+            ${lsItems.length ? `<h4>📦 localStorage（${lsItems.length}）</h4><div class="legacy-list">${lsRows}</div>` : ""}
+            ${idbItems.length ? `<h4>🗄 IndexedDB（${idbItems.length}）</h4><div class="legacy-list">${idbRows}</div>` : ""}
+          `}
+          <div class="modal-actions">
+            <button class="btn btn-warn" id="clExec" ${total === 0 ? "disabled" : ""}>${total === 0 ? "无可清理" : "🧹 清理选中"}</button>
+            <button class="btn btn-ghost" id="clCancel2">返回设置</button>
+          </div>
+        `;
+        openModal("🧹 清理老版本遗留数据 v3.0", body);
+        /* 重新挂事件 */
+        const cancel = document.getElementById("clCancel2");
+        if (cancel) cancel.onclick = openSettings;
+        const exec = document.getElementById("clExec");
+        if (exec) exec.onclick = () => executeCleanLegacy();
+        const selAll = document.getElementById("clSelAll");
+        if (selAll) selAll.onclick = () => {
+          document.querySelectorAll(".clLsChk, .clIdbChk").forEach(c => c.checked = true);
+        };
+        const selNone = document.getElementById("clSelNone");
+        if (selNone) selNone.onclick = () => {
+          document.querySelectorAll(".clLsChk, .clIdbChk").forEach(c => c.checked = false);
+        };
+        const selLegacy = document.getElementById("clSelLegacy");
+        if (selLegacy) selLegacy.onclick = () => {
+          document.querySelectorAll(".legacy-row").forEach(row => {
+            const cat = row.querySelector(".cat-tag");
+            const tag = cat ? cat.textContent : "";
+            const chk = row.querySelector("input[type=checkbox]");
+            if (chk) chk.checked = /旧版本|废弃|旧库/.test(tag);
+          });
+        };
+      }).catch(err => {
+        openModal("🧹 清理老版本遗留数据 v3.0", `
+          <div class="hint">扫描失败：${escapeHtml(String(err && err.message || err))}</div>
+          <div class="modal-actions"><button class="btn btn-ghost" id="clCancel3">返回设置</button></div>
+        `);
+        const c = document.getElementById("clCancel3");
+        if (c) c.onclick = openSettings;
+      });
+    }
+    async function executeCleanLegacy() {
+      const lsKeys = Array.from(document.querySelectorAll(".clLsChk:checked")).map(c => c.dataset.key);
+      const idbNames = Array.from(document.querySelectorAll(".clIdbChk:checked")).map(c => c.dataset.name);
+      const total = lsKeys.length + idbNames.length;
+      if (total === 0) { showToast("没有选中任何项"); return; }
+      const summary = (lsKeys.length ? "localStorage: " + lsKeys.join(", ") + "\n" : "") +
+                      (idbNames.length ? "IndexedDB: " + idbNames.join(", ") + "\n" : "");
+      if (!confirm("确认清理以下数据？此操作不可撤销：\n\n" + summary + "\n（白名单与本项目活跃数据不会被触碰）")) return;
+      /* localStorage：直接 removeItem */
+      let lsOk = 0, lsFail = 0;
+      lsKeys.forEach(k => {
+        try { localStorage.removeItem(k); lsOk++; } catch (e) { lsFail++; }
+      });
+      /* IndexedDB：deleteDatabase，被打开时 onblocked——提示用户先关其它标签页 */
+      let idbOk = 0, idbBlock = 0, idbFail = 0;
+      for (const n of idbNames) {
+        try {
+          const result = await new Promise((resolve) => {
+            const req = indexedDB.deleteDatabase(n);
+            req.onsuccess = () => resolve("ok");
+            req.onerror = () => resolve("err");
+            req.onblocked = () => resolve("blocked");
+          });
+          if (result === "ok") idbOk++;
+          else if (result === "blocked") idbBlock++;
+          else idbFail++;
+        } catch (e) { idbFail++; }
+      }
+      const tip = `清理完成 ✅ localStorage ${lsOk}${lsFail ? "(失败" + lsFail + ")" : ""} · IndexedDB ${idbOk}${idbBlock ? "(被占用" + idbBlock + "，请关掉其它打开该应用的标签页再试)" : ""}${idbFail ? "(失败" + idbFail + ")" : ""}`;
+      showToast(tip);
+      /* 重新扫描刷新列表 */
+      openCleanLegacy();
+    }
+
+    /* ============== 云同步（局域网家庭云 lan / cpolar 公司电脑同步） ============== */
+    /* 单条数据上限保护：超限时逐步精简流水账（本地完整保留），云与本地均安全 */
+    function buildSyncPayload() {
+      const payload = serialize();
+      let json = JSON.stringify(payload);
+      while (json.length > 15000 && payload.ledger.length > 0) {
+        payload.ledger = payload.ledger.slice(-Math.max(20, Math.floor(payload.ledger.length / 2)));
+        json = JSON.stringify(payload);
+      }
+      if (json.length > 15000) payload.ledger = [];
+      return JSON.stringify(payload);
+    }
+
+    /* 当前云端后端与家庭码（v2.3.1 起 kvdb 已移除；绑定必为 lan / cpolar） */
+    function syncConf() {
+      const c = state.sync || {};
+      return { backend: c.backend || "lan", bucket: c.bucket || "", base: c.base || "" };
+    }
+    /* 局域网家庭云服务器地址（绑定时的 base > 设置里保存的 > 本机默认） */
+    function lanBase() {
+      const c = state.sync || {};
+      const fromSettings = ((state.settings.lan && state.settings.lan.server) || "").trim().replace(/\/+$/, "");
+      const base = (c.base || fromSettings || LAN_DEFAULT).replace(/\/+$/, "");
+      return base || LAN_DEFAULT;
+    }
+    /* GitHub 地址公告板链接：公司电脑每 10 分钟把最新 cpolar 隧道地址推到仓库的 cpolar-addr.json */
+    function cpolarAddrUrl() {
+      const u = ((state.settings.cpolar && state.settings.cpolar.addr) || "").trim();
+      return /^https:\/\/raw\.githubusercontent\.com\/[\w.-]+\/[\w.-]+\/[^\/\s]+\/[\w.-]+\.json$/.test(u) ? u : "";
+    }
+    /* cpolar 隧道地址白名单校验：只认 *.cpolar.top/cn/com 的裸域名（排除官网 www./dashboard./api.）
+       [a-z0-9.-]+ 含点，兼容多层子域如 425298ec.r5.cpolar.top（r5 = 区域号），与 report-addr.ps1 解析正则保持一致 */
+    function validCpolarHost(url) {
+      return /^https?:\/\/(?!www\.|dashboard\.|api\.)[a-z0-9.-]+\.cpolar\.(?:top|cn|com)$/i.test(String(url || "").trim());
+    }
+    /* cpolar 地址内存缓存：现在每 10 秒轮询同步，若每次读写都先去 GitHub 公告板拉地址，
+       请求量过大且慢。隧道地址通常长时间不变，故在 CPOLAR_ADDR_TTL(60s) 内直接复用内存地址；
+       一旦读写失败(地址可能已换)，会 force 刷新一次公告板再重试。 */
+    let cpolarAddrMem = { url: "", ts: 0 };
+    const CPOLAR_ADDR_TTL = 60000;
+    /* 取公司电脑最新 cpolar 隧道地址：① 从 GitHub 地址公告板拉最新（8 秒超时）② 失败回退内存/上次成功的地址 */
+    async function refreshCpolarBase(force) {
+      const now = Date.now();
+      /* 60 秒内且已有可用地址 → 直接复用，不打 GitHub */
+      if (!force && validCpolarHost(cpolarAddrMem.url) && now - cpolarAddrMem.ts < CPOLAR_ADDR_TTL) {
+        return cpolarAddrMem.url;
+      }
+      const addrFile = cpolarAddrUrl();
+      let url = "";
+      if (addrFile) {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 8000);
+        try {
+          const r = await fetch(addrFile + "?t=" + Date.now(), { signal: ctrl.signal, cache: "no-store" });
+          if (r.ok) {
+            const j = await r.json().catch(() => null);
+            url = String((j && j.url) || "").trim().replace(/\/+$/, "");
+          }
+        } catch (e) { /* 网络不通 → 走缓存兜底 */ }
+        finally { clearTimeout(timer); }
+      }
+      if (validCpolarHost(url)) {
+        try { localStorage.setItem(CPOLAR_ADDR_KEY, url); } catch (e) {}
+        cpolarAddrMem = { url: url, ts: now };
+        return url;
+      }
+      /* 公告板没给到有效地址：有内存地址就直接复用（续期，避免频繁失败重试轰炸 GitHub） */
+      if (validCpolarHost(cpolarAddrMem.url)) {
+        cpolarAddrMem.ts = now;
+        return cpolarAddrMem.url;
+      }
+      /* 用上次成功的地址兜底（隧道没换地址时依然可用） */
+      const cached = (localStorage.getItem(CPOLAR_ADDR_KEY) || "").trim().replace(/\/+$/, "");
+      if (validCpolarHost(cached)) {
+        cpolarAddrMem = { url: cached, ts: now };
+        return cached;
+      }
+      throw new Error(addrFile
+        ? "GitHub 上的地址未就绪或无效（公司电脑上报任务是否已运行？）"
+        : "请先填写 GitHub 地址文件链接");
+    }
+    function genFamilyCode() {
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; /* 去掉易混淆的 I/O/0/1 */
+      let s = "F";
+      for (let i = 0; i < 7; i++) s += chars[Math.floor(Math.random() * chars.length)];
+      return s;
+    }
+    /* 云端三种原语（lan / cpolar 均走家庭云协议；cpolar 每次读写前自动从 GitHub 地址公告板取最新地址） */
+    async function cloudCreate(backend, payload, base) {
+      const bucket = genFamilyCode();
+      const realBase = backend === "cpolar" ? await refreshCpolarBase() : ((base || lanBase()).replace(/\/+$/, ""));
+      const r = await fetch(realBase + "/data/" + bucket, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: payload
+      });
+      if (!r.ok) {
+        const txt = (await r.text().catch(() => "")).trim();
+        throw new Error((txt || ("HTTP " + r.status)).slice(0, 120));
+      }
+      return bucket;
+    }
+    /* 带「地址过期自动重试」的数据请求：cpolar 模式下若当前地址失效（HTTP 错误 / 网络错），
+       强制刷新一次 GitHub 地址公告板再重试一次，防止隧道换地址后 60 秒缓存期内同步失败 */
+    async function cloudFetch(base, bucket, opt) {
+      const c = syncConf();
+      try {
+        const r = await fetch(base + "/data/" + bucket, opt);
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r;
+      } catch (e) {
+        if (c.backend !== "cpolar") throw e;
+        const b2 = await refreshCpolarBase(true);
+        if (b2 === base) throw e; /* 地址没变 → 原样抛出 */
+        const r2 = await fetch(b2 + "/data/" + bucket, opt);
+        if (!r2.ok) throw new Error("HTTP " + r2.status);
+        return r2;
+      }
+    }
+    async function cloudRead() {
+      const c = syncConf();
+      const base = c.backend === "cpolar" ? await refreshCpolarBase() : lanBase();
+      const r = await cloudFetch(base, c.bucket, {});
+      return await r.text();
+    }
+    async function cloudWrite(payload) {
+      const c = syncConf();
+      const base = c.backend === "cpolar" ? await refreshCpolarBase() : lanBase();
+      await cloudFetch(base, c.bucket, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: payload
+      });
+    }
+
+    async function syncPush(silent) {
+      if (!state.sync) return;
+      try {
+        /* 保险丝：本地没有"真实进度"（空壳 / 或只打过卡的 stub）而服务器上已有真实数据时，
+           禁止裸覆盖——改为拉取服务器数据，防"空页面/打卡 stub 反向冲掉真数据" */
+        if (!hasProgress()) {
+          let remote = null;
+          try {
+            const t = await cloudRead();
+            if (t) remote = JSON.parse(t);
+          } catch (e) { remote = null; }
+          if (remote && hasProgress(remote)) {
+            await syncPull(true, true);
+            if (!silent) showToast("本地无数据，已改为拉取云端最新数据 ☁️");
+            return;
+          }
+        }
+        await cloudWrite(buildSyncPayload());
+        state.sync.lastSync = Date.now();
+        persistSilent();
+        if (!silent) showToast("已上传到云端 ☁️");
+      } catch (e) {
+        if (!silent) showToast("上传失败，请检查网络与云端配置");
+        console.warn(e);
+      }
+    }
+
+    /* 兼容数组 / Set / 对象(如 dailyDone) 的元素计数（本地 state.done/pending 是 Set；remote 是数组；daily* 是对象） */
+    function _count(x) {
+      if (!x) return 0;
+      if (typeof x.size === "number") return x.size;   /* Set */
+      if (Array.isArray(x)) return x.length;           /* Array */
+      if (typeof x === "object") return Object.keys(x).length; /* Object(dailyDone/dailyPending) */
+      return x.length || 0;
+    }
+    /* 判断一份数据是否几乎为空壳（默认判断本地 state；可传入 remote 对象）。用于防止"空壳"反向覆盖真实数据 */
+    function isEmptyState(obj) {
+      const s = obj || state;
+      return _count(s.done) === 0
+        && _count(s.pending) === 0
+        && (s.sun || 0) === 0
+        && _count(s.ledger) === 0;
+    }
+    /* 是否有"真实学习进度"：只要有已完成/待审批任务、每日打卡记录，或超过 1 条流水（>仅打卡），
+       或家长设置了审核(PIN/审核模式)，都算有真实数据。
+       —— 关键：一个"只打了卡、sun>0 但无任何任务/审批"的状态是『打卡 stub』，不算真实进度，
+          绝不能凭较新的时间戳去覆盖真正有任务/审批进度的数据。 */
+    function hasProgress(obj) {
+      const s = obj || state;
+      return _count(s.done) > 0
+        || _count(s.pending) > 0
+        || _count(s.dailyDone) > 0
+        || _count(s.dailyPending) > 0
+        || _count(s.ledger) > 1
+        || (s.settings && (!!s.settings.pinHash || !!s.settings.reviewMode));
+    }
+    /* 数据丰富度评分：真实进度越多，评分越高（用于双方都有数据时谁更"完整"） */
+    function dataScore(obj) {
+      const s = obj || state;
+      return _count(s.done) + _count(s.pending) + _count(s.dailyDone) + _count(s.dailyPending)
+        + Math.max(0, _count(s.ledger) - 1);
+    }
+    /* 同步专用拉取合并：进度集(done/pending/daily*)取并集——只增不减，绝不因拉取丢掉另一台设备已完成/待审批的任务；
+       数值/配置(名字/阳光/流水/自定义/审核设置)取自"更丰富"一侧，避免较空的一方覆盖。 */
+    function syncAdopt(remote) {
+      const m = migrate(remote);
+      /* 进度并集 */
+      state.done = new Set([...state.done, ...m.done]);
+      state.pending = new Set([...state.pending, ...m.pending]);
+      state.dailyDone = Object.assign({}, m.dailyDone || {}, state.dailyDone || {});
+      state.dailyPending = Object.assign({}, m.dailyPending || {}, state.dailyPending || {});
+      /* 更丰富的一侧决定数值/配置；本地无进度则用云端 */
+      const useRemoteScalars = isEmptyState() || dataScore(m) > dataScore(state);
+      if (useRemoteScalars) {
+        ["name","sun","streak","lastCheckIn","redeemed","ledger","custom","rules","settings","sync","updatedAt","version"].forEach(k => { state[k] = m[k]; });
+      } else {
+        state.updatedAt = Math.max(state.updatedAt || 0, m.updatedAt || 0);
+      }
+    }
+
+    /* 内容指纹：比较本地与服务器两份数据是否「实质一致」。
+       仅靠 updatedAt 时间戳不够——可能出现时间戳相同但内容不同（A 勾了任务没来得及传，
+       B 先传了一份较新的），此时必须靠指纹识别出差异并合并收敛，而不是当作"已同步"跳过。 */
+    function fingerprint(obj) {
+      const s = obj ? migrate(obj) : migrate(serialize());
+      const arr = (x) => { if (!x) return []; return Array.isArray(x) ? x : Array.from(x); };
+      return [
+        s.sun || 0,
+        arr(s.done).length, arr(s.done).slice().sort().join(","),
+        arr(s.pending).length, arr(s.pending).slice().sort().join(","),
+        JSON.stringify(s.dailyDone || {}),
+        JSON.stringify(s.dailyPending || {}),
+        (s.ledger || []).length,
+        (s.name || ""),
+        JSON.stringify(s.settings || {})
+      ].join("|");
+    }
+
+    async function syncPull(silent, force, writeBack) {
+      if (!state.sync) throw new Error("未绑定");
+      const text = await cloudRead();
+      if (!text) throw new Error("云端为空");
+      const remote = JSON.parse(text);
+      const localProg = hasProgress();
+      const remoteProg = hasProgress(remote);
+      const remoteEmpty = isEmptyState(remote);
+      /* ① 服务器纯空壳（sun=0 无进度）且本地有数据 → 让用户知道这个码当前是空的，避免误覆盖 */
+      if (remoteEmpty && !isEmptyState()) throw new Error("该家庭码当前是空的（服务器上还没有打卡数据），为避免覆盖你本地已有数据已停止同步。若你想同步本地数据，请改用「创建家庭云空间」生成含数据的新码");
+      /* ② 云端只有「打卡 stub」（sun>0 但无任务/无审批）且本地有真实进度 → 绝不用空数据覆盖本地；明确告知改走上传 */
+      if (!remoteProg && localProg && !force) throw new Error("该家庭码云端目前只有打卡记录（还没有任务进度或审批数据）。为避免覆盖你本地已有的真实数据，已停止下载——请改用「仅上传」把你的完整数据同步上去。");
+      /* ③ 拉取条件：强制 / 本地无进度(新设备加入) / （云端有真实进度 且 云端较新） */
+      const needPull = force || !localProg || (remoteProg && remote.updatedAt && remote.updatedAt > state.updatedAt);
+      if (needPull) {
+        await takeSnapshot();
+        syncAdopt(remote);
+        /* 并集合并后，若合并结果含服务器没有的进度（如 A 勾了任务但没来得及传，B 先传了一份）
+           → 把合并后的完整数据写回服务器，让所有设备都收敛到同一份完整数据。
+           仅「仅下载」手动按钮(writeBack=false)不写回。 */
+        if (writeBack !== false && fingerprint() !== fingerprint(remote)) {
+          await cloudWrite(buildSyncPayload());
+        }
+        persistSilent(); render();
+        document.getElementById("studentName").value = state.name;
+      }
+      state.sync.lastSync = Date.now();
+      persistSilent();
+      if (!silent) showToast("已同步最新数据 ☁️");
+    }
+
+    async function smartSync(silent) {
+      if (!state.sync) return;
+      try {
+        const text = await cloudRead();
+        let remote = null;
+        if (text) { try { remote = JSON.parse(text); } catch (e) { remote = null; } }
+        const localEmpty = isEmptyState();
+        const remoteEmpty = !remote || isEmptyState(remote);
+        const localProg = hasProgress();
+        const remoteProg = remote && hasProgress(remote);
+        const localT = state.updatedAt || 0;
+        const remoteT = (remote && remote.updatedAt) || 0;
+        /* 自动同步决策（每 10 秒轮询调用）——按用户规则：比较服务器数据与本地数据的新旧，
+           新的一侧胜出：
+           ① 两边时间戳一致 → 已同步，不做无意义的上传/下载
+           ② 本地有真实进度、服务器是空壳/仅打卡 → 上传本地覆盖服务器（自愈：真数据绝不
+              被空壳/打卡壳覆盖——这是对『纯按时间戳覆盖』的防呆，防止之前反复出现的
+              「新打开空白页凭较新时间戳冲掉真数据」）
+           ③ 服务器有真实进度、本地是空壳（新设备/新页面）→ 拉取服务器覆盖本地
+           ④ 服务器时间戳比本地新 → 用服务器数据覆盖本地（拉取）
+           ⑤ 本地时间戳比服务器新 → 上传本地数据覆盖服务器 */
+        if (remote && remoteT && localT && remoteT === localT) {
+          /* 时间戳一致且内容指纹一致 → 真的已同步，不做无意义推拉 */
+          if (fingerprint() === fingerprint(remote)) {
+            state.sync.lastSync = Date.now();
+            persistSilent();
+            if (!silent) showToast("已是最新数据 ☁️");
+            return;
+          }
+          /* 时间戳一致但内容不同 → 双方各有对方没有的改动（如 A 勾了任务但没来得及传，
+             B 先传了一份较新的）→ 合并并集并写回，让所有设备收敛到同一份完整数据 */
+          await syncPull(true, true);
+          if (!silent) showToast("已合并并同步 ☁️");
+          return;
+        }
+        if (localProg && (remoteEmpty || !remoteProg)) {
+          await syncPush(true);
+          if (!silent) showToast("本地较新，已上传 ☁️");
+          return;
+        }
+        if (remoteProg && localEmpty) {
+          await syncPull(true, true);
+          if (!silent) showToast("已同步最新数据 ☁️");
+          return;
+        }
+        if (remoteT > localT) {
+          await syncPull(true, true);
+          if (!silent) showToast("已同步最新数据 ☁️");
+          return;
+        }
+        /* 本地新（或两边都空且本地时间戳新）→ 上传 */
+        await syncPush(true);
+        if (!silent) showToast("本地较新，已上传 ☁️");
+      } catch (e) {
+        if (!silent) showToast("同步失败，请检查网络");
+        console.warn(e);
+      }
+    }
+
+    /* ============== 导入 / 导出 ============== */
+    function exportData() {
+      const payload = {
+        _app: "njGrade2Workbench",
+        _ver: DATA_VERSION,
+        _time: new Date().toISOString(),
+        state: serialize()
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "二年级学习工作台数据-" + todayStr() + ".json";
+      a.click();
+      URL.revokeObjectURL(a.href);
+      state.settings.lastExport = new Date().toLocaleString("zh-CN");
+      save();
+      showToast("已导出数据文件 ☀️");
+    }
+
+    function importData(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const obj = JSON.parse(e.target.result);
+          const data = obj.state || obj;
+          if (!confirm("导入将覆盖当前工作台数据（会先自动备份一份快照），确定继续吗？")) return;
+          takeSnapshot().then(() => {
+            adoptState(data);
+            save(); render();
+            document.getElementById("studentName").value = state.name;
+            showToast("导入成功 ✅");
+          });
+        } catch (err) {
+          showToast("文件格式错误，导入失败");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    /* ============== 事件绑定 & 初始化 ============== */
+    document.getElementById("checkInBtn").onclick = checkIn;
+    document.getElementById("confirmPendingBtn").onclick = confirmPending;
+    document.getElementById("ledgerBtn").onclick = openLedger;
+    document.getElementById("settingsBtn").onclick = openSettings;
+    document.getElementById("editBtn").onclick = () => {
+      if (editMode) exitEditMode();
+      else enterEditMode();
+    };
+
+    const nameInput = document.getElementById("studentName");
+    nameInput.onchange = () => {
+      state.name = nameInput.value.trim() || "小同学";
+      save();
+    };
+    /* 版本标记：页面标题旁显示当前代码版本，用于确认浏览器已加载最新版 */
+    const vt = document.getElementById("verTag");
+    if (vt) vt.textContent = "v3.0";
+
+    const drawer = document.getElementById("rewardDrawer");
+    const head = document.getElementById("rewardHead");
+    const toggle = document.getElementById("rewardToggle");
+    head.onclick = () => {
+      const open = drawer.classList.toggle("open");
+      toggle.textContent = open ? "收起" : "展开";
+    };
+
+    /* 启动 */
+    state = loadState();
+    state.done = new Set(state.done);
+    state.pending = new Set(state.pending);
+    /* 清理过期的每日待确认 */
+    const today = todayStr();
+    Object.keys(state.dailyPending).forEach(k => { if (state.dailyPending[k] !== today) delete state.dailyPending[k]; });
+    nameInput.value = state.name;
+    if (!getConfig().subjects.find(s => s.id === currentSubjectId)) currentSubjectId = getConfig().subjects[0].id;
+    render();
+    /* 开机自动云同步（静默双向：cpolar 模式自动从 GitHub 地址公告板取公司电脑最新地址） */
+    if (state.sync && state.sync.auto) {
+      smartSync(true).catch(() => {});
+      startPolling();
+      /* 从小程序/切页返回时立刻补同步一次，保证数据最新 */
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") startPolling();
+      });
+    }
+  </script>
+</body>
+</html>
