@@ -1876,6 +1876,17 @@
       const base = (c.base || fromSettings || LAN_DEFAULT).replace(/\/+$/, "");
       return base || LAN_DEFAULT;
     }
+    /* 协议自适应：当页面从 https(GitHub Pages) 打开，而 cpolar 公告板推来的是 http 地址时，
+       浏览器会因「混合内容(mixed content)」拦截对 http 的请求，导致同步失败（表现为 Network 里
+       /data/FD9W9HTK 红字）。这里自动把 http 升级为 https（仅当当前页面是 https 才触发）。
+       cpolar 隧道同一域名同时支持 http/https 访问，升级后无副作用；本地 file:// 打开不受影响。 */
+    function normalizeCpolarScheme(u) {
+      u = String(u || "").trim();
+      if (typeof location !== "undefined" && location.protocol === "https:" && /^http:\/\//i.test(u)) {
+        u = u.replace(/^http:\/\//i, "https://");
+      }
+      return u;
+    }
     /* GitHub 地址公告板链接：公司电脑每 10 分钟把最新 cpolar 隧道地址推到仓库的 cpolar-addr.json */
     function cpolarAddrUrl() {
       const u = ((state.settings.cpolar && state.settings.cpolar.addr) || "").trim();
@@ -1912,6 +1923,7 @@
         } catch (e) { /* 网络不通 → 走缓存兜底 */ }
         finally { clearTimeout(timer); }
       }
+      url = normalizeCpolarScheme(url);
       if (validCpolarHost(url)) {
         try { localStorage.setItem(CPOLAR_ADDR_KEY, url); } catch (e) {}
         cpolarAddrMem = { url: url, ts: now };
@@ -1923,7 +1935,8 @@
         return cpolarAddrMem.url;
       }
       /* 用上次成功的地址兜底（隧道没换地址时依然可用） */
-      const cached = (localStorage.getItem(CPOLAR_ADDR_KEY) || "").trim().replace(/\/+$/, "");
+      let cached = (localStorage.getItem(CPOLAR_ADDR_KEY) || "").trim().replace(/\/+$/, "");
+      cached = normalizeCpolarScheme(cached);
       if (validCpolarHost(cached)) {
         cpolarAddrMem = { url: cached, ts: now };
         return cached;
