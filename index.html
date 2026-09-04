@@ -136,11 +136,15 @@
       padding: 14px 18px; margin-bottom: 18px;
       box-shadow: var(--shadow); display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
     }
-    .today-box h2 { margin: 0; font-size: 16px; color: #5d4037; }
+    .today-box h2 { margin: 0; font-size: 16px; color: #5d4037; flex: 0 0 100%; }
+    /* 推荐胶囊容器：标题独占一行后，用 flex wrap 让每个小胶囊按内容宽度逐个换行，
+       避免在手机/微信内置浏览器窄屏下互相挤压、文字被截断（如"眼保健操 2"被拆成两段、"次"字孤立溢出） */
+    .today-box #quickTasks { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; min-width: 0; align-items: center; }
     .today-box .quick-task {
       background: white; border-radius: 999px; padding: 6px 12px;
       font-size: 13px; cursor: pointer; box-shadow: 0 2px 0 rgba(0,0,0,0.08);
       border: 2px solid transparent;
+      white-space: nowrap; flex: 0 0 auto; max-width: 100%;
     }
     .today-box .quick-task:hover { border-color: var(--accent-dark); }
     .today-box .quick-task.done { opacity: .55; text-decoration: line-through; }
